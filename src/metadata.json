@@ -1,0 +1,13 @@
+{
+  "name" : "CryptoWhale",
+  "description" : "Gnome Shell extension to monitor your cryto stash",
+  "shell-version" : [
+    "3.38"
+  ],
+  "url" : "https://github.com/filidorwiese/gnome-shell-crypto-whale",
+  "author_url" : "https://filidorwiese.nl",
+  "uuid" : "cryptowhale@filidorwiese.nl",
+  "version" : 1.01,
+  "settings-schema":  "org.gnome.shell.extensions.crypto-whale",
+  "gettext-domain": "crypto-whale"
+}
