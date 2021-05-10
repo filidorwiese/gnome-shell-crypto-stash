@@ -6,16 +6,7 @@ const GObject = imports.gi.GObject;
 
 const Local = imports.misc.extensionUtils.getCurrentExtension();
 const Convenience = Local.imports.convenience;
-
-const STORAGE_KEY = "portfolios";
-const DEFAULT_PORTFOLIO = {
-  name: 'New Portfolio',
-  visible: true,
-  currency: 'USD',
-  assets: [
-    { symbol: 'BTC', amount: 1 },
-  ]
-};
+const Globals = Local.imports.Globals;
 
 const ConfigModel = new Lang.Class({
   Name: "ConfigModel",
@@ -107,13 +98,13 @@ var PortfolioModel = new GObject.Class({
   },
 
   _getDefaults: function () {
-    return DEFAULT_PORTFOLIO;
+    return Globals.DEFAULT_PORTFOLIO;
   },
 
   _reloadFromSettings: function () {
     this.clear();
 
-    let configs = this._settings.get_strv(STORAGE_KEY);
+    let configs = this._settings.get_strv(Globals.STORAGE_KEY_PORTFOLIOS);
 
     for (let key in configs) {
       let json = configs[key];
@@ -139,7 +130,7 @@ var PortfolioModel = new GObject.Class({
       res = this.iter_next(iter);
     }
 
-    this._settings.set_strv(STORAGE_KEY, configs);
+    this._settings.set_strv(Globals.STORAGE_KEY_PORTFOLIOS, configs);
   },
 
   _onRowChanged: function (self, path, iter) {

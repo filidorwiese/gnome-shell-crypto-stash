@@ -7,9 +7,5 @@
 		<key name="portfolios" type="as">
 			<default>[]</default>
 		</key>
-
-		<key name="coins" type="as">
-			<default>[]</default>
-		</key>
 	</schema>
 </schemalist>

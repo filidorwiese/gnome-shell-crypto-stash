@@ -1,11 +1,10 @@
 const GObject = imports.gi.GObject;
 const Gtk = imports.gi.Gtk;
 
-const Config = imports.misc.config;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Local = ExtensionUtils.getCurrentExtension();
 const HTTP = Local.imports.HTTP;
-const Convenience = Local.imports.convenience;
+const Globals = Local.imports.Globals;
 
 const PortfolioModel =
   Local.imports.PortfolioModel.PortfolioModel;
@@ -27,9 +26,39 @@ const MyPrefsWidget = GObject.registerClass(
       super._init({
         orientation: Gtk.Orientation.HORIZONTAL,
         margin: 10,
-        width_request: 400
+        width_request: 600
       });
 
+      this.loadCoinCapCoins();
+    }
+
+    loadCoinCapCoins() {
+      this._loadingText = new Gtk.Label({
+        visible: true,
+        justify: 1,
+        label: `Loading assets from coincap.io`,
+        expand: true,
+        xalign: 0.5
+      });
+      this.add(this._loadingText);
+
+      // Load available assets from coincap.io
+      this.availableCoins = ['BTC'];
+      HTTP.getJSON(Globals.GET_ASSETS_URL, (_, data) => {
+        if (data.hasOwnProperty('data') && data.data.length > 0) {
+          this.availableCoins = data.data.map((c) => c.symbol).sort((a, b) => {
+            if (a > b) return 1
+            if (a < b) return -1
+            return 0
+          });
+        }
+
+        this.remove(this._loadingText);
+        this.render();
+      });
+    }
+
+    render () {
       this._store = new PortfolioModel();
 
       /* sidebar (left) */
@@ -65,6 +94,8 @@ const MyPrefsWidget = GObject.registerClass(
       /* behavior */
       this._selection = this._treeView.get_selection();
       this._selection.connect('changed', this._onSelectionChanged.bind(this));
+
+      this.show_all();
     }
 
     _getTreeView () {
@@ -110,7 +141,7 @@ const MyPrefsWidget = GObject.registerClass(
         return;
       }
 
-      this._portfolioConfigView = new PortfolioConfigView(config);
+      this._portfolioConfigView = new PortfolioConfigView(config, this.availableCoins);
       this._configLayout.add(this._portfolioConfigView.widget);
     }
 

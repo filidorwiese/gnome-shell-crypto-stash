@@ -12,7 +12,7 @@ $ gnome-extensions prefs cryptowhale@filidorwiese.nl
 ### Compiling schema
 
 ```
-$ glib-compile-schemas schemas/
+$ glib-compile-schemas src/schemas/
 ```
 
 ### Viewing stored data

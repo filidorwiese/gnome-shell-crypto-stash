@@ -3,6 +3,9 @@ const GObject = imports.gi.GObject;
 const Signals = imports.signals;
 const Lang = imports.lang;
 
+const Local = imports.misc.extensionUtils.getCurrentExtension();
+const Globals = Local.imports.Globals;
+
 const makeConfigRow = (description, widget) => {
   let box = new Gtk.Box({
     orientation: Gtk.Orientation.HORIZONTAL,
@@ -23,9 +26,6 @@ const makeConfigRow = (description, widget) => {
   return box;
 };
 
-const availableSymbols = [ 'BTC', 'XLM', 'DOT', 'ETH' ];
-const availableCurrencies = [ 'USD', 'EUR' ];
-
 const ComboBoxView = new Lang.Class({
   Name: "ComboBoxView",
 
@@ -45,7 +45,7 @@ const ComboBoxView = new Lang.Class({
     this.model = model;
     this.setOptions(options);
 
-    comboBox.connect('changed', (entry) => {
+    comboBox.connect('changed', (_) => {
       let i = comboBox.get_active();
       if (i in this._options) {
         this.emit('changed', this._options[i].value);
@@ -76,9 +76,10 @@ Signals.addSignalMethods(ComboBoxView.prototype);
 var PortfolioConfigView = new Lang.Class({
   Name: "CryptoWhale.PortfolioConfigView",
 
-  _init: function (config) {
+  _init: function (config, availableCoins) {
 
     this._config = config;
+    this._availableCoins = availableCoins;
 
     this._renderView();
   },
@@ -147,7 +148,7 @@ var PortfolioConfigView = new Lang.Class({
   _confCurrency: function () {
     let preset = this._config.get('currency');
 
-    let options = availableCurrencies.map(
+    let options = Globals.AVAILABLE_CURRENCIES.map(
       (v, i) => ({label: v, value: v, active: (v === preset)})
     );
     const currencyView = new ComboBoxView(options);
@@ -179,7 +180,7 @@ var PortfolioConfigView = new Lang.Class({
       orientation: Gtk.Orientation.HORIZONTAL,
     });
 
-    let options = availableSymbols.map(
+    let options = this._availableCoins.map(
       (v, i) => ({label: v, value: v, active: (i === 0)})
     );
     this.addAssetSymbolView = new ComboBoxView(options);
@@ -326,8 +327,6 @@ var PortfolioConfigView = new Lang.Class({
 
       res = this._listAssetsStore.iter_next(iter);
     }
-
-    log(JSON.stringify(newAssets))
 
     this._config.set('assets', newAssets);
   },

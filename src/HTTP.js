@@ -1,6 +1,4 @@
-const Lang = imports.lang;
 const Soup = imports.gi.Soup;
-
 const Local = imports.misc.extensionUtils.getCurrentExtension();
 const Config = imports.misc.config;
 
