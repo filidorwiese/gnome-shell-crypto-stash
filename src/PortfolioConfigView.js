@@ -3,12 +3,6 @@ const GObject = imports.gi.GObject;
 const Signals = imports.signals;
 const Lang = imports.lang;
 
-const ExtensionUtils = imports.misc.extensionUtils;
-const Local = ExtensionUtils.getCurrentExtension();
-const HTTP = Local.imports.HTTP;
-
-const GET_ASSETS_URL = 'https://api.coincap.io/v2/assets';
-
 const makeConfigRow = (description, widget) => {
   let box = new Gtk.Box({
     orientation: Gtk.Orientation.HORIZONTAL,
@@ -29,7 +23,8 @@ const makeConfigRow = (description, widget) => {
   return box;
 };
 
-let availableSymbols = [ 'BTC', 'XLM', 'DOT', 'ETH' ];
+const availableSymbols = [ 'BTC', 'XLM', 'DOT', 'ETH' ];
+const availableCurrencies = [ 'USD', 'EUR' ];
 
 const ComboBoxView = new Lang.Class({
   Name: "ComboBoxView",
@@ -78,28 +73,14 @@ const ComboBoxView = new Lang.Class({
 Signals.addSignalMethods(ComboBoxView.prototype);
 
 
-var TickerConfigView = new Lang.Class({
-  Name: "CryptoWhale.TickerConfigView",
+var PortfolioConfigView = new Lang.Class({
+  Name: "CryptoWhale.PortfolioConfigView",
 
-  _init: function (tickerConfig) {
+  _init: function (config) {
 
-    this._tickerConfig = tickerConfig;
+    this._config = config;
 
     this._renderView();
-
-    // HTTP.getJSON(GET_ASSETS_URL, (_, data) => {
-    //   // availableAssets = Object.values(data).map((a) => a.symbol);
-    //   // log(JSON.stringify(data));
-    //   availableSymbols = [ 'BB', 'AA', 'ZZ' ];
-    //   // this._renderView();
-    //
-    //   let options = availableSymbols.map(
-    //     (v, i) => ({label: v, value: v, active: (i === 0)})
-    //   );
-    //   this.addAssetSymbolView.set_model(options);
-    //   // = new ComboBoxView(options);
-    // });
-
   },
 
   _renderView: function() {
@@ -109,15 +90,15 @@ var TickerConfigView = new Lang.Class({
     });
 
     let frame;
-    frame = new Gtk.Frame({ label: "Ticker Settings", margin_bottom: 15 });
-    this._layoutTickerSettings = new Gtk.Box({
+    frame = new Gtk.Frame({ label: "Portfolio Settings", margin_bottom: 15 });
+    this._layoutPortfolioSettings = new Gtk.Box({
       orientation: Gtk.Orientation.VERTICAL,
       border_width: padding
     });
-    frame.add(this._layoutTickerSettings);
+    frame.add(this._layoutPortfolioSettings);
     this.widget.add(frame);
 
-    frame = new Gtk.Frame({ label: "Assets Settings" });
+    frame = new Gtk.Frame({ label: "Crypto stash" });
     this._layoutAssetsSettings = new Gtk.Box({
       orientation: Gtk.Orientation.VERTICAL,
       border_width: padding
@@ -125,8 +106,9 @@ var TickerConfigView = new Lang.Class({
     frame.add(this._layoutAssetsSettings);
     this.widget.add(frame);
 
-    this._layoutTickerSettings.add(this._confName());
-    this._layoutTickerSettings.add(this._confVisible());
+    this._layoutPortfolioSettings.add(this._confName());
+    this._layoutPortfolioSettings.add(this._confVisible());
+    this._layoutPortfolioSettings.add(this._confCurrency());
 
     this._layoutAssetsSettings.add(this._confAssetsCollection());
     this._layoutAssetsSettings.add(new Gtk.Separator());
@@ -136,7 +118,7 @@ var TickerConfigView = new Lang.Class({
   },
 
   _confName: function () {
-    let preset = this._tickerConfig.get('name');
+    let preset = this._config.get('name');
 
     let nameView = new Gtk.Entry({
       'max-length': 20,
@@ -144,22 +126,40 @@ var TickerConfigView = new Lang.Class({
     });
 
     nameView.connect('notify::text', () => {
-      this._tickerConfig.set('name', nameView.get_text());
+      this._config.set('name', nameView.get_text());
     });
 
     return makeConfigRow("Name", nameView);
   },
 
   _confVisible: function () {
-    let preset = this._tickerConfig.get('visible') !== false;
+    let preset = this._config.get('visible') !== false;
 
     let switchView = new Gtk.Switch({active: preset});
 
     switchView.connect('notify::active', (obj) => {
-      this._tickerConfig.set('visible', obj.active);
+      this._config.set('visible', obj.active);
     });
 
     return makeConfigRow("Visible", switchView);
+  },
+
+  _confCurrency: function () {
+    let preset = this._config.get('currency');
+
+    let options = availableCurrencies.map(
+      (v, i) => ({label: v, value: v, active: (v === preset)})
+    );
+    const currencyView = new ComboBoxView(options);
+
+    currencyView.connect('changed', (obj) => {
+      let [success, iter] = currencyView.widget.get_active_iter();
+      if (!success) return;
+      let symbol = currencyView.model.get_value(iter, 0);
+      this._config.set('currency', symbol);
+    });
+
+    return makeConfigRow("Currency", currencyView.widget);
   },
 
   _confAssetsCollection: function() {
@@ -190,7 +190,7 @@ var TickerConfigView = new Lang.Class({
       text: '1'
     });
     this.addAssetButton = new Gtk.Button({
-      label: 'Add coin',
+      label: 'Add asset',
       margin_left: 15
     });
     this.addAssetButton.connect('clicked', this._addClicked.bind(this));
@@ -209,7 +209,7 @@ var TickerConfigView = new Lang.Class({
   },
 
   _getAssetsTreeView: function () {
-    let preset = this._tickerConfig.get('assets');
+    let preset = this._config.get('assets');
     this._listAssetsStore = new Gtk.ListStore();
     this._listAssetsStore.set_column_types ([
       GObject.TYPE_STRING,
@@ -230,7 +230,7 @@ var TickerConfigView = new Lang.Class({
       vexpand: true
     });
 
-    let symbol = new Gtk.TreeViewColumn ({ title: "Coin" });
+    let symbol = new Gtk.TreeViewColumn ({ title: "Asset" });
     let amount = new Gtk.TreeViewColumn ({ title: "Amount" });
     let normal = new Gtk.CellRendererText ();
     symbol.pack_start (normal, true);
@@ -255,8 +255,7 @@ var TickerConfigView = new Lang.Class({
 
     toolbar.get_style_context().add_class(Gtk.STYLE_CLASS_INLINE_TOOLBAR);
 
-    let delButton = this._delButton =
-      new Gtk.ToolButton({label: 'Remove coin' });
+    let delButton = this._delButton = new Gtk.ToolButton({label: 'Remove asset' });
     delButton.connect('clicked', this._delClicked.bind(this));
     toolbar.add(delButton);
 
@@ -330,7 +329,7 @@ var TickerConfigView = new Lang.Class({
 
     log(JSON.stringify(newAssets))
 
-    this._tickerConfig.set('assets', newAssets);
+    this._config.set('assets', newAssets);
   },
 
   destroy: function () {
@@ -339,4 +338,4 @@ var TickerConfigView = new Lang.Class({
   }
 });
 
-Signals.addSignalMethods(TickerConfigView.prototype);
+Signals.addSignalMethods(PortfolioConfigView.prototype);

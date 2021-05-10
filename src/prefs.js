@@ -7,10 +7,10 @@ const Local = ExtensionUtils.getCurrentExtension();
 const HTTP = Local.imports.HTTP;
 const Convenience = Local.imports.convenience;
 
-const TickerCollectionModel =
-  Local.imports.TickerCollectionModel.TickerCollectionModel;
-const TickerConfigView =
-  Local.imports.TickerConfigView.TickerConfigView;
+const PortfolioModel =
+  Local.imports.PortfolioModel.PortfolioModel;
+const PortfolioConfigView =
+  Local.imports.PortfolioConfigView.PortfolioConfigView;
 
 function init() {}
 
@@ -30,7 +30,7 @@ const MyPrefsWidget = GObject.registerClass(
         width_request: 400
       });
 
-      this._store = new TickerCollectionModel();
+      this._store = new PortfolioModel();
 
       /* sidebar (left) */
       let sidebar = new Gtk.Box({
@@ -55,7 +55,7 @@ const MyPrefsWidget = GObject.registerClass(
         margin: 50,
         visible: true,
         justify: 2,
-        label: `<span size="xx-large">🐋</span>\n\n${Local.metadata['name']} v${Local.metadata['version'].toFixed(2)}\n\nAuthor: <a href="${Local.metadata['author_url']}">Filidor Wiese</a>\n\nRepository: <a href="${Local.metadata['url']}">${Local.metadata['url']}</a>`,
+        label: `<span size="xx-large">🐋</span>\n\n${Local.metadata['title']} v${Local.metadata['version'].toFixed(2)}\n\nAuthor: <a href="${Local.metadata['author_url']}">Filidor Wiese</a>\n\nRepository: <a href="${Local.metadata['url']}">${Local.metadata['url']}</a>`,
         useMarkup: true,
         xalign: 0,
         expand: true
@@ -76,7 +76,7 @@ const MyPrefsWidget = GObject.registerClass(
         vexpand: true
       });
 
-      let label = new Gtk.TreeViewColumn({title: "Tickers"});
+      let label = new Gtk.TreeViewColumn({title: "Portfolios"});
       let renderer = new Gtk.CellRendererText();
       label.pack_start(renderer, true);
       label.add_attribute(renderer, "text", 0);
@@ -89,29 +89,29 @@ const MyPrefsWidget = GObject.registerClass(
       let [isSelected, , iter] = this._selection.get_selected();
 
       if (isSelected) {
-        this._showTickerConfig(this._store.getConfig(iter));
+        this._showPortfolioConfig(this._store.getConfig(iter));
         this._introText.visible = false;
       } else {
-        this._showTickerConfig(null);
+        this._showPortfolioConfig(null);
         this._introText.visible = true;
       }
 
       this._updateToolbar();
     }
 
-    _showTickerConfig (tickerConfig) {
-      if (this._tickerConfigView) {
-        this._configLayout.remove(this._tickerConfigView.widget);
-        this._tickerConfigView.destroy();
-        this._tickerConfigView = null;
+    _showPortfolioConfig (config) {
+      if (this._portfolioConfigView) {
+        this._configLayout.remove(this._portfolioConfigView.widget);
+        this._portfolioConfigView.destroy();
+        this._portfolioConfigView = null;
       }
 
-      if (tickerConfig === null) {
+      if (config === null) {
         return;
       }
 
-      this._tickerConfigView = new TickerConfigView(tickerConfig);
-      this._configLayout.add(this._tickerConfigView.widget);
+      this._portfolioConfigView = new PortfolioConfigView(config);
+      this._configLayout.add(this._portfolioConfigView.widget);
     }
 
     _getToolbar () {

@@ -7,7 +7,15 @@ const GObject = imports.gi.GObject;
 const Local = imports.misc.extensionUtils.getCurrentExtension();
 const Convenience = Local.imports.convenience;
 
-const TICKERS_KEY = "tickers";
+const STORAGE_KEY = "portfolios";
+const DEFAULT_PORTFOLIO = {
+  name: 'New Portfolio',
+  visible: true,
+  currency: 'USD',
+  assets: [
+    { symbol: 'BTC', amount: 1 },
+  ]
+};
 
 const ConfigModel = new Lang.Class({
   Name: "ConfigModel",
@@ -36,9 +44,9 @@ const ConfigModel = new Lang.Class({
 
 Signals.addSignalMethods(ConfigModel.prototype);
 
-var TickerCollectionModel = new GObject.Class({
-  Name: "CryptoWhale.TickerCollectionModel",
-  GTypeName: "TickerCollectionModel",
+var PortfolioModel = new GObject.Class({
+  Name: "CryptoWhale.PortfolioModel",
+  GTypeName: "PortfolioModel",
   Extends: Gtk.ListStore,
 
   Columns: {
@@ -49,8 +57,6 @@ var TickerCollectionModel = new GObject.Class({
   _init: function (params) {
 
     this.parent(params);
-
-    // this._apiProvider = apiProvider;
 
     this.set_column_types([GObject.TYPE_STRING, GObject.TYPE_STRING]);
 
@@ -101,20 +107,13 @@ var TickerCollectionModel = new GObject.Class({
   },
 
   _getDefaults: function () {
-    return {
-      name: 'New Ticker',
-      visible: true,
-      assets: [
-        { symbol: 'BTC', amount: 1 },
-        { symbol: 'XLM', amount: 12 },
-      ]
-    };
+    return DEFAULT_PORTFOLIO;
   },
 
   _reloadFromSettings: function () {
     this.clear();
 
-    let configs = this._settings.get_strv(TICKERS_KEY);
+    let configs = this._settings.get_strv(STORAGE_KEY);
 
     for (let key in configs) {
       let json = configs[key];
@@ -126,7 +125,7 @@ var TickerCollectionModel = new GObject.Class({
           [label, json]
         );
       } catch (e) {
-        log("error loading ticker config: " + e);
+        log("error loading portfolio config: " + e);
       }
     }
   },
@@ -140,7 +139,7 @@ var TickerCollectionModel = new GObject.Class({
       res = this.iter_next(iter);
     }
 
-    this._settings.set_strv(TICKERS_KEY, configs);
+    this._settings.set_strv(STORAGE_KEY, configs);
   },
 
   _onRowChanged: function (self, path, iter) {

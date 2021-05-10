@@ -4,12 +4,12 @@
 		id="org.gnome.shell.extensions.crypto-whale"
 		path="/org/gnome/shell/extensions/crypto-whale/">
 
-		<key name="tickers" type="as">
+		<key name="portfolios" type="as">
 			<default>[]</default>
 		</key>
 
-		<key name="first-run" type="b">
-			<default>true</default>
+		<key name="coins" type="as">
+			<default>[]</default>
 		</key>
 	</schema>
 </schemalist>

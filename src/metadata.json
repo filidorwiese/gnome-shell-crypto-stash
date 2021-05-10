@@ -1,5 +1,6 @@
 {
-  "name" : "CryptoWhale",
+  "name" : "CryptoWhale \uD83D\uDC0B",
+  "title" : "CryptoWhale",
   "description" : "Gnome Shell extension to monitor your cryto stash",
   "shell-version" : [
     "3.38"
