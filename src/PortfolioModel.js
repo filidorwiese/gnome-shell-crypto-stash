@@ -55,6 +55,11 @@ var PortfolioModel = new GObject.Class({
 
     this._reloadFromSettings();
 
+    // this._settingsChangedId = this._settings.connect(
+    //   'changed::' + Globals.STORAGE_KEY_PORTFOLIOS,
+    //   this._reloadFromSettings.bind(this)
+    // );
+
     var flag;
 
     let mutex = (func) =>
@@ -159,5 +164,9 @@ var PortfolioModel = new GObject.Class({
 
   _onRowDeleted: function (self, path, iter) {
     this._writeSettings();
+  },
+
+  destroy: function () {
+    this._settings.disconnect(this._settingsChangedId);
   }
 });

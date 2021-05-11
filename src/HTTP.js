@@ -19,7 +19,7 @@ HTTPError.prototype.constructor = HTTPError;
 
 const STATUS_TOO_MANY_REQUESTS = 429;
 
-const isErrTooManyRequests = (err) =>
+var isErrTooManyRequests = (err) =>
     err &&
         err.soupMessage &&
         err.soupMessage.status_code &&

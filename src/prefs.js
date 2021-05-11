@@ -44,7 +44,7 @@ const MyPrefsWidget = GObject.registerClass(
 
       // Load available assets from coincap.io
       this.availableCoins = ['BTC'];
-      HTTP.getJSON(Globals.GET_ASSETS_URL, (_, data) => {
+      HTTP.getJSON(Globals.GET_CRYPTO_ASSETS_URL, (_, data) => {
         if (data.hasOwnProperty('data') && data.data.length > 0) {
           this.availableCoins = data.data.map((c) => c.symbol).sort((a, b) => {
             if (a > b) return 1

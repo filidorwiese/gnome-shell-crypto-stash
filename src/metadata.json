@@ -3,6 +3,7 @@
   "title" : "CryptoWhale",
   "description" : "Gnome Shell extension to monitor your cryto stash",
   "shell-version" : [
+    "3.36",
     "3.38"
   ],
   "url" : "https://github.com/filidorwiese/gnome-shell-crypto-whale",

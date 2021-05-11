@@ -1,7 +1,7 @@
 ### Debugging logs
 
 ```
-$ journalctl -f
+$ journalctl -f /usr/bin/gnome-shell
 ```
 
 ### Open prefs dialog
