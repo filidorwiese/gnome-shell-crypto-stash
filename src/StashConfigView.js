@@ -150,7 +150,6 @@ var StashConfigView = new Lang.Class({
       (v, i) => ({label: v, value: v, active: (v === preset)})
     )
     const currencyView = new ComboBoxView(options)
-
     currencyView.connect('changed', (obj) => {
       let [success, iter] = currencyView.widget.get_active_iter()
       if (!success) return

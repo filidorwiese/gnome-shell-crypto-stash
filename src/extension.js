@@ -67,19 +67,27 @@ const StashIndicaterView = new Lang.Class({
 
     layout.add_actor(this._statusView)
     layout.add_actor(this._indicatorView)
-
     this.add_actor(layout)
 
-    this._popupItemStatus = new PopupMenu.PopupMenuItem(
+    this._popupItemTitle = new PopupMenu.PopupMenuItem(
       '', {activate: false, hover: false, can_focus: false}
     )
-    this._popupItemStatus.label.set_style('max-width: 400px;font-size:10px;')
-    this._popupItemStatus.label.clutter_text.set_line_wrap(true)
-    this.menu.addMenuItem(this._popupItemStatus)
+    this._popupItemTitle.label.set_style('max-width: 400px;') // font-size:12px;
+    this._popupItemTitle.label.clutter_text.set_line_wrap(true)
+    this._popupItemTitle.label.clutter_text.set_use_markup(true)
+    this.menu.addMenuItem(this._popupItemTitle)
+
+    this._popupItemBreakdown = new PopupMenu.PopupMenuItem(
+      '', {activate: false, hover: false, can_focus: false}
+    )
+    this._popupItemBreakdown.label.set_style('max-width: 400px; font-size:12px;')
+    this._popupItemBreakdown.label.clutter_text.set_line_wrap(true)
+    this._popupItemBreakdown.label.clutter_text.set_use_markup(true)
+    this.menu.addMenuItem(this._popupItemBreakdown)
 
     this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem())
 
-    this._popupItemSettings = new PopupMenu.PopupMenuItem('⚙ CryptoStash Settings')
+    this._popupItemSettings = new PopupMenu.PopupMenuItem('⚙ Settings...')
     this.menu.addMenuItem(this._popupItemSettings)
     this._popupItemSettings.connect('activate', () => {
       Util.spawn(['gnome-extensions', 'prefs', Local.metadata.uuid])
@@ -102,8 +110,6 @@ const StashIndicaterView = new Lang.Class({
       } else {
         this._showData(stash)
       }
-
-      // this._updatePopupItemLabel(err, stash)
     })
 
     this._displayStatus(_Symbols.refresh)
@@ -113,39 +119,18 @@ const StashIndicaterView = new Lang.Class({
     log('err ' + JSON.stringify(error))
     this._displayText('error')
     this._displayStatus(_Symbols.error)
-    this._popupItemStatus.text = 'error'
-    log('extension.js: _showError')
+    this._popupItemBreakdown.text = error
   },
 
   _showData: function (stash) {
-    log('extension.js: _showData')
-
     this._displayText(stash.currency + ' ' + stash.totalValue)
     this._displayStatus(_Symbols.wallet)
-    this._popupItemStatus.label.text = `👛  ${stash.name}\n\n${stash.stash.map((c) => {
-      return `${c.amount} x ${c.asset}\t\t${c.value} = ${c.totalValue}`
-    }).join('\n')}`
+    this._popupItemTitle.label.clutter_text.set_markup(`👛 <b>${stash.name}</b>`)
 
-    // let _StatusToSymbol = {
-    //   up: _Symbols.up,
-    //   down: _Symbols.down,
-    //   unchanged: " "
-    // };
-
-    // let {text} = data;
-    // if (this._options.show_base_currency) {
-    //   text += "/" + this._options.coin;
-    // }
-    // this._displayText(text);
-    //
-    // let symbol = " ";
-    //
-    // if (this._options.show_change) {
-    //   symbol = _StatusToSymbol[data.change];
-    //   this._displayStatus(symbol);
-    // } else {
-    //   this._statusView.width = 0;
-    // }
+    this._popupItemBreakdown.label.clutter_text.set_markup(`${stash.stash.map((c) => {
+      // return `${c.amount} ${c.asset}\t\t${c.value} = ${c.totalValue}`
+      return `${c.amount.toFixed(3)} ${c.asset} × ${stash.currency} ${c.value.toFixed(2)}\t = ${stash.currency} ${c.totalValue.toFixed(2)}`
+    }).join('\n')}`)
   },
 
   _displayStatus: function (text) {
@@ -154,14 +139,6 @@ const StashIndicaterView = new Lang.Class({
 
   _displayText: function (text) {
     this._indicatorView.text = text
-  },
-
-  _updatePopupItemLabel: function (err, data) {
-    let text = 'Hello'//this._api.getLabel(this._options);
-    if (err) {
-      text += '\n\nError:\n' + String(err)
-    }
-    this._popupItemStatus.label.text = text
   },
 
   destroy: function () {

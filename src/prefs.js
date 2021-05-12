@@ -152,14 +152,11 @@ const MyPrefsWidget = GObject.registerClass(
 
       toolbar.get_style_context().add_class(Gtk.STYLE_CLASS_INLINE_TOOLBAR);
 
-      /* new widget button with menu */
       let newButton = new Gtk.ToolButton({icon_name: "list-add-symbolic"});
       newButton.connect('clicked', this._addClicked.bind(this));
       toolbar.add(newButton);
 
-      /* delete button */
-      let delButton = this._delButton =
-        new Gtk.ToolButton({icon_name: "list-remove-symbolic"});
+      let delButton = this._delButton =  new Gtk.ToolButton({icon_name: "list-remove-symbolic"});
       delButton.connect('clicked', this._delClicked.bind(this));
       toolbar.add(delButton);
 
