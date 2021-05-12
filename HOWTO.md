@@ -1,3 +1,9 @@
+### Install extension locally
+
+```
+$ ln -s "${PWD}/src/" ~/.local/share/gnome-shell/extensions/cryptostash@filidorwiese.nl
+```
+
 ### Debugging logs
 
 ```
@@ -6,7 +12,7 @@ $ journalctl -f /usr/bin/gnome-shell
 
 ### Open prefs dialog
 ```
-$ gnome-extensions prefs cryptowhale@filidorwiese.nl
+$ gnome-extensions prefs cryptostash@filidorwiese.nl
 ```
 
 ### Compiling schema

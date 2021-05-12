@@ -35,9 +35,9 @@ const ConfigModel = new Lang.Class({
 
 Signals.addSignalMethods(ConfigModel.prototype);
 
-var PortfolioModel = new GObject.Class({
-  Name: "CryptoWhale.PortfolioModel",
-  GTypeName: "PortfolioModel",
+var StashModel = new GObject.Class({
+  Name: "CryptoStash.StashModel",
+  GTypeName: "StashModel",
   Extends: Gtk.ListStore,
 
   Columns: {
@@ -56,7 +56,7 @@ var PortfolioModel = new GObject.Class({
     this._reloadFromSettings();
 
     // this._settingsChangedId = this._settings.connect(
-    //   'changed::' + Globals.STORAGE_KEY_PORTFOLIOS,
+    //   'changed::' + Globals.STORAGE_KEY_STASHES,
     //   this._reloadFromSettings.bind(this)
     // );
 
@@ -103,13 +103,13 @@ var PortfolioModel = new GObject.Class({
   },
 
   _getDefaults: function () {
-    return Globals.DEFAULT_PORTFOLIO;
+    return Globals.DEFAULT_STASH;
   },
 
   _reloadFromSettings: function () {
     this.clear();
 
-    let configs = this._settings.get_strv(Globals.STORAGE_KEY_PORTFOLIOS);
+    let configs = this._settings.get_strv(Globals.STORAGE_KEY_STASHES);
 
     for (let key in configs) {
       let json = configs[key];
@@ -121,7 +121,7 @@ var PortfolioModel = new GObject.Class({
           [label, json]
         );
       } catch (e) {
-        log("error loading portfolio config: " + e);
+        log("error loading stash config: " + e);
       }
     }
   },
@@ -135,7 +135,7 @@ var PortfolioModel = new GObject.Class({
       res = this.iter_next(iter);
     }
 
-    this._settings.set_strv(Globals.STORAGE_KEY_PORTFOLIOS, configs);
+    this._settings.set_strv(Globals.STORAGE_KEY_STASHES, configs);
   },
 
   _onRowChanged: function (self, path, iter) {

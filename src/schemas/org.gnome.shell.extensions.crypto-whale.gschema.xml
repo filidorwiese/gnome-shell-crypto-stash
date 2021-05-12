@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist gettext-domain="gnome-shell-extensions">
 	<schema
-		id="org.gnome.shell.extensions.crypto-whale"
-		path="/org/gnome/shell/extensions/crypto-whale/">
+		id="org.gnome.shell.extensions.crypto-stash"
+		path="/org/gnome/shell/extensions/crypto-stash/">
 
-		<key name="portfolios" type="as">
+		<key name="stashes" type="as">
 			<default>[]</default>
 		</key>
 	</schema>

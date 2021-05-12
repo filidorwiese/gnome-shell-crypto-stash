@@ -15,10 +15,7 @@ const IndicatorModel = Local.imports.IndicatorModel.IndicatorModel
 const _Symbols = {
   error: '\u26A0',
   refresh: '\u27f3',
-  up: '\u25b2',
-  down: '\u25bc',
-  wallet: '👛',
-  unchanged: ' ',
+  wallet: '👛'
 }
 
 let _indicatorCollection
@@ -41,16 +38,16 @@ function disable () {
   _api.destroy()
 }
 
-const PortfolioIndicaterView = new Lang.Class({
-  Name: 'PortfolioIndicaterView',
+const StashIndicaterView = new Lang.Class({
+  Name: 'StashIndicaterView',
   Extends: PanelMenu.Button,
 
-  _init: function (portfolio) {
+  _init: function (stash) {
     this.parent(0)
-    this._portfolio = portfolio
+    this._stash = stash
     this._api = _api
 
-    log(JSON.stringify(portfolio))
+    log(JSON.stringify(stash))
     this._initLayout()
     this._initBehavior()
   },
@@ -82,7 +79,7 @@ const PortfolioIndicaterView = new Lang.Class({
 
     this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem())
 
-    this._popupItemSettings = new PopupMenu.PopupMenuItem('Settings')
+    this._popupItemSettings = new PopupMenu.PopupMenuItem('⚙ CryptoStash Settings')
     this.menu.addMenuItem(this._popupItemSettings)
     this._popupItemSettings.connect('activate', () => {
       Util.spawn(['gnome-extensions', 'prefs', Local.metadata.uuid])
@@ -90,7 +87,7 @@ const PortfolioIndicaterView = new Lang.Class({
   },
 
   _initBehavior: function () {
-    this._model = new IndicatorModel(this._api, this._portfolio)
+    this._model = new IndicatorModel(this._api, this._stash)
 
     this._model.connect('update-start', () => {
       log('extension.js: update-start')
@@ -125,7 +122,7 @@ const PortfolioIndicaterView = new Lang.Class({
 
     this._displayText(stash.currency + ' ' + stash.totalValue)
     this._displayStatus(_Symbols.wallet)
-    this._popupItemStatus.label.text = `👛 ${stash.name}\n\n${stash.stash.map((c) => {
+    this._popupItemStatus.label.text = `👛  ${stash.name}\n\n${stash.stash.map((c) => {
       return `${c.amount} x ${c.asset}\t\t${c.value} = ${c.totalValue}`
     }).join('\n')}`
 
@@ -185,7 +182,7 @@ let IndicatorCollection = new Lang.Class({
     this._settings = Convenience.getSettings()
 
     this._settingsChangedId = this._settings.connect(
-      'changed::' + Globals.STORAGE_KEY_PORTFOLIOS,
+      'changed::' + Globals.STORAGE_KEY_STASHES,
       this._createIndicators.bind(this)
     )
 
@@ -195,22 +192,22 @@ let IndicatorCollection = new Lang.Class({
   _createIndicators: function () {
     this._removeAll()
 
-    let portfolios = this._settings.get_strv(Globals.STORAGE_KEY_PORTFOLIOS)
+    let stashes = this._settings.get_strv(Globals.STORAGE_KEY_STASHES)
 
-    // Use a default portfolio if none have been created yet
-    if (!portfolios || portfolios.length < 1) {
-      portfolios = [JSON.stringify(Globals.DEFAULT_PORTFOLIO)]
+    // Use a default stash if none have been created yet
+    if (!stashes || stashes.length < 1) {
+      stashes = [JSON.stringify(Globals.DEFAULT_STASH)]
     }
 
-    let indicators = portfolios
+    let indicators = stashes
       .map(JSON.parse)
-      .filter((portfolio) => portfolio.visible);
+      .filter((s) => s.visible);
 
     if (indicators.length) {
       _api.startPolling();
-      indicators.forEach((portfolios) => {
+      indicators.forEach((s) => {
         try {
-          this.add(new PortfolioIndicaterView(portfolios))
+          this.add(new StashIndicaterView(s))
         } catch (e) {
           log('error creating indicator: ' + e)
         }
@@ -227,7 +224,7 @@ let IndicatorCollection = new Lang.Class({
 
   add: function (indicator) {
     this._indicators.push(indicator)
-    let name = 'crypto-whale-indicator-' + this._indicators.length
+    let name = 'crypto-stash-indicator-' + this._indicators.length
     Main.panel.addToStatusArea(name, indicator)
   },
 

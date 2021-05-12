@@ -25,14 +25,7 @@ var isErrTooManyRequests = (err) =>
         err.soupMessage.status_code &&
         Number(err.soupMessage.status_code) === STATUS_TOO_MANY_REQUESTS
 
-const _repository = "http://github.com/FilidorWiese/" +
-                    "gnome-shell-cryptowhale";
-
-const _userAgent =  "gnome-shell-cryptowhale" +
-                    "/" + Local.metadata.version +
-                    "/Gnome" + Config.PACKAGE_VERSION +
-                    " (" + _repository + ")";
-
+const _userAgent =  `${Local.metadata['title']}/${Local.metadata.version}/Gnome ${Config.PACKAGE_VERSION} (${Local.metadata['url']})`;
 const _httpSession = new Soup.SessionAsync();
 _httpSession['user-agent'] = _userAgent;
 
@@ -44,7 +37,7 @@ Soup.Session.prototype.add_feature.call(
 var getJSON = (url, callback) => {
   let message = Soup.Message.new("GET", url);
   let headers = message.request_headers;
-  headers.append('X-Client', `${Local.metadata['name']} v${Local.metadata['version'].toFixed(2)} - Gnome Shell Extension`);
+  headers.append('X-Client', _userAgent);
   _httpSession.queue_message(
     message,
     (session, message) => {

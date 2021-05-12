@@ -5,9 +5,9 @@ const Mainloop = imports.mainloop
 var IndicatorModel = new Lang.Class({
   Name: 'IndicatorModel',
 
-  _init: function (handler, portfolio) {
+  _init: function (handler, stash) {
     this._handler = handler
-    this._portfolio = portfolio
+    this._stash = stash
 
     this._signalUpdateStart = handler.connect(
       'update-start', () => {
@@ -47,12 +47,12 @@ var IndicatorModel = new Lang.Class({
   },
 
   _calculateStash: function () {
-    let stash = this._portfolio.assets.map((a) => {
+    let stash = this._stash.assets.map((a) => {
       const amount = parseFloat(String(a.amount).replace(',', '.'))
       const assetRate = this._handler.cryptoRates.filter((c) => c.symbol === a.symbol)
       let assetPrice = assetRate.length ? parseFloat(assetRate[0].priceUsd) : 0
 
-      if (this._portfolio.currency === 'EUR') {
+      if (this._stash.currency === 'EUR') {
         assetPrice /= parseFloat(this._handler.currencyRates.rateUsd)
       }
 
@@ -69,12 +69,12 @@ var IndicatorModel = new Lang.Class({
     }, 0)
 
     let currencySymbol = '$'
-    if (this._portfolio.currency === 'EUR') {
+    if (this._stash.currency === 'EUR') {
       currencySymbol = '€'
     }
 
     return {
-      name: this._portfolio.name,
+      name: this._stash.name,
       totalValue: parseInt(totalValue),
       currency: currencySymbol,
       stash,

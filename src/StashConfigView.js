@@ -73,8 +73,8 @@ const ComboBoxView = new Lang.Class({
 Signals.addSignalMethods(ComboBoxView.prototype);
 
 
-var PortfolioConfigView = new Lang.Class({
-  Name: "CryptoWhale.PortfolioConfigView",
+var StashConfigView = new Lang.Class({
+  Name: "CryptoStash.StashConfigView",
 
   _init: function (config, availableCoins) {
 
@@ -91,12 +91,12 @@ var PortfolioConfigView = new Lang.Class({
     });
 
     let frame;
-    frame = new Gtk.Frame({ label: "Portfolio Settings", margin_bottom: 15 });
-    this._layoutPortfolioSettings = new Gtk.Box({
+    frame = new Gtk.Frame({ label: "Stash Settings", margin_bottom: 15 });
+    this._layoutStashSettings = new Gtk.Box({
       orientation: Gtk.Orientation.VERTICAL,
       border_width: padding
     });
-    frame.add(this._layoutPortfolioSettings);
+    frame.add(this._layoutStashSettings);
     this.widget.add(frame);
 
     frame = new Gtk.Frame({ label: "Crypto stash" });
@@ -107,9 +107,9 @@ var PortfolioConfigView = new Lang.Class({
     frame.add(this._layoutAssetsSettings);
     this.widget.add(frame);
 
-    this._layoutPortfolioSettings.add(this._confName());
-    this._layoutPortfolioSettings.add(this._confVisible());
-    this._layoutPortfolioSettings.add(this._confCurrency());
+    this._layoutStashSettings.add(this._confName());
+    this._layoutStashSettings.add(this._confVisible());
+    this._layoutStashSettings.add(this._confCurrency());
 
     this._layoutAssetsSettings.add(this._confAssetsCollection());
     this._layoutAssetsSettings.add(new Gtk.Separator());
@@ -337,4 +337,4 @@ var PortfolioConfigView = new Lang.Class({
   }
 });
 
-Signals.addSignalMethods(PortfolioConfigView.prototype);
+Signals.addSignalMethods(StashConfigView.prototype);

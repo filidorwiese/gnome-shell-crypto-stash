@@ -1,15 +1,14 @@
 {
-  "name" : "CryptoWhale \uD83D\uDC0B",
-  "title" : "CryptoWhale",
-  "description" : "Gnome Shell extension to monitor your cryto stash",
+  "name" : "CryptoStash \uD83D\uDC5B",
+  "title" : "CryptoStash",
+  "description" : "Gnome Shell extension to monitor your crytocurrency stash",
   "shell-version" : [
     "3.36",
     "3.38"
   ],
-  "url" : "https://github.com/filidorwiese/gnome-shell-crypto-whale",
+  "url" : "https://github.com/filidorwiese/gnome-shell-crypto-stash",
   "author_url" : "https://filidorwiese.nl",
-  "uuid" : "cryptowhale@filidorwiese.nl",
+  "uuid" : "cryptostash@filidorwiese.nl",
   "version" : 1.01,
-  "settings-schema":  "org.gnome.shell.extensions.crypto-whale",
-  "gettext-domain": "crypto-whale"
+  "settings-schema":  "org.gnome.shell.extensions.crypto-stash"
 }

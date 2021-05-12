@@ -6,10 +6,10 @@ const Local = ExtensionUtils.getCurrentExtension();
 const HTTP = Local.imports.HTTP;
 const Globals = Local.imports.Globals;
 
-const PortfolioModel =
-  Local.imports.PortfolioModel.PortfolioModel;
-const PortfolioConfigView =
-  Local.imports.PortfolioConfigView.PortfolioConfigView;
+const StashModel =
+  Local.imports.StashModel.StashModel;
+const StashConfigView =
+  Local.imports.StashConfigView.StashConfigView;
 
 function init() {}
 
@@ -59,7 +59,7 @@ const MyPrefsWidget = GObject.registerClass(
     }
 
     render () {
-      this._store = new PortfolioModel();
+      this._store = new StashModel();
 
       /* sidebar (left) */
       let sidebar = new Gtk.Box({
@@ -84,7 +84,7 @@ const MyPrefsWidget = GObject.registerClass(
         margin: 50,
         visible: true,
         justify: 2,
-        label: `<span size="xx-large">🐋</span>\n\n${Local.metadata['title']} v${Local.metadata['version'].toFixed(2)}\n\nAuthor: <a href="${Local.metadata['author_url']}">Filidor Wiese</a>\n\nRepository: <a href="${Local.metadata['url']}">${Local.metadata['url']}</a>`,
+        label: `<span size="xx-large">👛</span>\n\n${Local.metadata['title']} v${Local.metadata['version'].toFixed(2)}\n\nAuthor: <a href="${Local.metadata['author_url']}">Filidor Wiese</a>\n\nRepository: <a href="${Local.metadata['url']}">${Local.metadata['url']}</a>`,
         useMarkup: true,
         xalign: 0,
         expand: true
@@ -107,7 +107,7 @@ const MyPrefsWidget = GObject.registerClass(
         vexpand: true
       });
 
-      let label = new Gtk.TreeViewColumn({title: "Portfolios"});
+      let label = new Gtk.TreeViewColumn({title: "Stashes"});
       let renderer = new Gtk.CellRendererText();
       label.pack_start(renderer, true);
       label.add_attribute(renderer, "text", 0);
@@ -120,29 +120,29 @@ const MyPrefsWidget = GObject.registerClass(
       let [isSelected, , iter] = this._selection.get_selected();
 
       if (isSelected) {
-        this._showPortfolioConfig(this._store.getConfig(iter));
+        this._showStashConfig(this._store.getConfig(iter));
         this._introText.visible = false;
       } else {
-        this._showPortfolioConfig(null);
+        this._showStashConfig(null);
         this._introText.visible = true;
       }
 
       this._updateToolbar();
     }
 
-    _showPortfolioConfig (config) {
-      if (this._portfolioConfigView) {
-        this._configLayout.remove(this._portfolioConfigView.widget);
-        this._portfolioConfigView.destroy();
-        this._portfolioConfigView = null;
+    _showStashConfig (config) {
+      if (this._stashConfigView) {
+        this._configLayout.remove(this._stashConfigView.widget);
+        this._stashConfigView.destroy();
+        this._stashConfigView = null;
       }
 
       if (config === null) {
         return;
       }
 
-      this._portfolioConfigView = new PortfolioConfigView(config, this.availableCoins);
-      this._configLayout.add(this._portfolioConfigView.widget);
+      this._stashConfigView = new StashConfigView(config, this.availableCoins);
+      this._configLayout.add(this._stashConfigView.widget);
     }
 
     _getToolbar () {
