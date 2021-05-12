@@ -111,6 +111,11 @@ var StashModel = new GObject.Class({
 
     let configs = this._settings.get_strv(Globals.STORAGE_KEY_STASHES);
 
+    // Use a default stash if none have been created yet
+    if (!configs || configs.length < 1) {
+      configs = [JSON.stringify(Globals.DEFAULT_STASH)]
+    }
+
     for (let key in configs) {
       let json = configs[key];
       try {
