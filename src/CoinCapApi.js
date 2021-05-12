@@ -13,10 +13,6 @@ var CoinCapApi = new Lang.Class({
 
   interval: defaultInterval,
 
-  disabled: false,
-
-  errorCount: 0,
-
   currencyRates: null,
 
   cryptoRates: null,
@@ -24,88 +20,68 @@ var CoinCapApi = new Lang.Class({
   _init: function () {},
 
   startPolling: function () {
-    log('start polling')
     let loop = () => {
       this.emit('update-start')
 
       // Get crypto assets rates
       this.getCryptoRates((error, data) => {
         if (error) {
-          logError(error)
-          this.errorCount++
-        }
-
-        if (HTTP.isErrTooManyRequests(error)) {
-          log(`${Local.metadata['name']}: http error: too many requests - disabled updating`)
-          this.errorCount++
-        }
-
-        if (data.hasOwnProperty('data') && data.data.length > 0) {
-          this.cryptoRates = data.data;
-          this.errorCount = 0
-          this.interval = defaultInterval
-          this.emit('update-crypto-rates', error, this.cryptoRates)
+          if (HTTP.isErrTooManyRequests(error)) {
+            logError(`${Local.metadata['name']}: http error: too many requests`)
+            this.interval *= 2;
+          } else {
+            logError(error)
+          }
+          this.emit('update-crypto-rates', 'coincap.io api request failed')
         } else {
-          logError('Crypto rates lookup error')
-          this.errorCount++
+          if (data.hasOwnProperty('data') && data.data.length > 0) {
+            this.cryptoRates = data.data;
+            this.interval = defaultInterval
+            this.emit('update-crypto-rates')
+          } else {
+            logError('Crypto rates lookup error')
+          }
         }
       })
 
       // Get currency conversion rates
       this.getCurrencyRates((error, data) => {
         if (error) {
-          logError(error)
-          this.errorCount++
-        }
-
-        if (HTTP.isErrTooManyRequests(error)) {
-          log(`${Local.metadata['name']}: http error: too many requests - disabled updating`)
-          this.errorCount++
-        }
-
-        if (data.hasOwnProperty('data') && data.data.hasOwnProperty('rateUsd')) {
-          this.currencyRates = data.data;
-          this.errorCount = 0
-          this.interval = defaultInterval
-          this.emit('update-currency-rates', error, this.currencyRates)
+          if (HTTP.isErrTooManyRequests(error)) {
+            logError(`${Local.metadata['name']}: http error: too many requests`)
+            this.interval *= 2;
+          } else {
+            logError(error)
+          }
+          this.emit('update-currency-rates', 'coincap.io api request failed')
         } else {
-          logError('USD/EUR rate lookup error')
-          this.errorCount++
+          if (data.hasOwnProperty('data') && data.data.hasOwnProperty('rateUsd')) {
+            this.currencyRates = data.data;
+            this.interval = defaultInterval
+            this.emit('update-currency-rates')
+          } else {
+            logError('USD/EUR rate lookup error')
+          }
         }
       })
 
-      // Slow down
-      if (this.errorCount > 0) {
-        this.interval = 600
-      }
-
-      // Disable after 10 consecutive errors
-      if (this.errorCount > 10) {
-        this.disabled = true;
-      }
-
-      if (!this.disabled) {
-        this._signalTimeout = Mainloop.timeout_add_seconds(
-          this.interval, loop
-        )
-      }
+      this._signalTimeout = Mainloop.timeout_add_seconds(
+        this.interval, loop
+      )
     }
 
     Mainloop.idle_add(loop)
   },
 
   getCryptoRates: function (callback) {
-    log('polling crypto rates')
     HTTP.getJSON(Globals.GET_CRYPTO_ASSETS_URL, callback)
   },
 
   getCurrencyRates: function (callback) {
-    log('polling currency rates')
     HTTP.getJSON(Globals.GET_CONVERSION_RATES_URL, callback)
   },
 
   stopPolling: function() {
-    log('stop polling')
     if (this._signalTimeout) {
       Mainloop.source_remove(this._signalTimeout)
     }

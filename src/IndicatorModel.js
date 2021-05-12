@@ -11,27 +11,23 @@ var IndicatorModel = new Lang.Class({
 
     this._signalUpdateStart = handler.connect(
       'update-start', () => {
-        log('IndicatorModel.js: update-start')
         this.emit('update-start')
       }
     )
 
     this._signalUpdateCryptoRates = handler.connect(
       'update-crypto-rates', (obj, error) => {
-        log('IndicatorModel.js: crypto rates update')
         this._triggerUpdate(error)
       }
     )
 
     this._signalUpdateCurrencyRates = handler.connect(
       'update-currency-rates', (obj, error) => {
-        log('IndicatorModel.js: currency rates update')
         this._triggerUpdate(error)
       }
     )
 
     Mainloop.idle_add(() => {
-      log('initial triggerupdate')
       this._triggerUpdate()
     })
   },

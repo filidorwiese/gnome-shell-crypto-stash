@@ -26,7 +26,6 @@ function init (metadata) {}
 function enable () {
   try {
     _api = new CoinCapApi.CoinCapApi()
-
     _indicatorCollection = new IndicatorCollection()
   } catch (e) {
     logError(e)
@@ -47,7 +46,6 @@ const StashIndicaterView = new Lang.Class({
     this._stash = stash
     this._api = _api
 
-    log(JSON.stringify(stash))
     this._initLayout()
     this._initBehavior()
   },
@@ -72,7 +70,7 @@ const StashIndicaterView = new Lang.Class({
     this._popupItemTitle = new PopupMenu.PopupMenuItem(
       '', {activate: false, hover: false, can_focus: false}
     )
-    this._popupItemTitle.label.set_style('max-width: 400px;') // font-size:12px;
+    this._popupItemTitle.label.set_style('max-width: 400px;')
     this._popupItemTitle.label.clutter_text.set_line_wrap(true)
     this._popupItemTitle.label.clutter_text.set_use_markup(true)
     this.menu.addMenuItem(this._popupItemTitle)
@@ -98,13 +96,10 @@ const StashIndicaterView = new Lang.Class({
     this._model = new IndicatorModel(this._api, this._stash)
 
     this._model.connect('update-start', () => {
-      log('extension.js: update-start')
       this._displayStatus(_Symbols.refresh)
     })
 
     this._model.connect('update', (obj, err, stash) => {
-      log('extension.js: update')
-      log(JSON.stringify(stash))
       if (err) {
         this._showError(err)
       } else {
@@ -115,11 +110,8 @@ const StashIndicaterView = new Lang.Class({
     this._displayStatus(_Symbols.refresh)
   },
 
-  _showError: function (error) {
-    log('err ' + JSON.stringify(error))
-    this._displayText('error')
+  _showError: function () {
     this._displayStatus(_Symbols.error)
-    this._popupItemBreakdown.text = error
   },
 
   _showData: function (stash) {
@@ -128,8 +120,7 @@ const StashIndicaterView = new Lang.Class({
     this._popupItemTitle.label.clutter_text.set_markup(`👛 <b>${stash.name}</b>`)
 
     this._popupItemBreakdown.label.clutter_text.set_markup(`${stash.stash.map((c) => {
-      // return `${c.amount} ${c.asset}\t\t${c.value} = ${c.totalValue}`
-      return `${c.amount.toFixed(3)} ${c.asset} × ${stash.currency} ${c.value.toFixed(2)}\t = ${stash.currency} ${c.totalValue.toFixed(2)}`
+      return `${c.amount.toFixed(3)} ${c.asset} × ${stash.currency} ${c.value.toFixed(2)}\t = ${stash.currency} ${c.totalValue.toFixed(0)}`
     }).join('\n')}`)
   },
 
@@ -154,7 +145,6 @@ let IndicatorCollection = new Lang.Class({
   Name: 'IndicatorCollection',
 
   _init: function () {
-    log('@@@ Loading')
     this._indicators = []
     this._settings = Convenience.getSettings()
 
@@ -186,7 +176,7 @@ let IndicatorCollection = new Lang.Class({
         try {
           this.add(new StashIndicaterView(s))
         } catch (e) {
-          log('error creating indicator: ' + e)
+          logError('error creating indicator: ' + e)
         }
       })
     } else {

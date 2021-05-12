@@ -126,7 +126,7 @@ var StashModel = new GObject.Class({
           [label, json]
         );
       } catch (e) {
-        log("error loading stash config: " + e);
+        logError("error loading stash config: " + e);
       }
     }
   },
