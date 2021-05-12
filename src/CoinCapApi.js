@@ -28,14 +28,14 @@ var CoinCapApi = new Lang.Class({
         if (error) {
           if (HTTP.isErrTooManyRequests(error)) {
             logError(`${Local.metadata['name']}: http error: too many requests`)
-            this.interval *= 2;
+            this.interval *= 2
           } else {
             logError(error)
           }
           this.emit('update-crypto-rates', 'coincap.io api request failed')
         } else {
           if (data.hasOwnProperty('data') && data.data.length > 0) {
-            this.cryptoRates = data.data;
+            this.cryptoRates = data.data
             this.interval = defaultInterval
             this.emit('update-crypto-rates')
           } else {
@@ -49,14 +49,14 @@ var CoinCapApi = new Lang.Class({
         if (error) {
           if (HTTP.isErrTooManyRequests(error)) {
             logError(`${Local.metadata['name']}: http error: too many requests`)
-            this.interval *= 2;
+            this.interval *= 2
           } else {
             logError(error)
           }
           this.emit('update-currency-rates', 'coincap.io api request failed')
         } else {
           if (data.hasOwnProperty('data') && data.data.hasOwnProperty('rateUsd')) {
-            this.currencyRates = data.data;
+            this.currencyRates = data.data
             this.interval = defaultInterval
             this.emit('update-currency-rates')
           } else {
@@ -81,14 +81,14 @@ var CoinCapApi = new Lang.Class({
     HTTP.getJSON(Globals.GET_CONVERSION_RATES_URL, callback)
   },
 
-  stopPolling: function() {
+  stopPolling: function () {
     if (this._signalTimeout) {
       Mainloop.source_remove(this._signalTimeout)
     }
   },
 
   destroy: function () {
-    this.stopPolling();
+    this.stopPolling()
   }
 })
 

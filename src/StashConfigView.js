@@ -336,7 +336,6 @@ var StashConfigView = new Lang.Class({
       this._saveAssetsCollection()
     }
 
-
     this._updateAssetsToolbar()
   },
 

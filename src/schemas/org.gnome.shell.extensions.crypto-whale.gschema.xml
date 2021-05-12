@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist gettext-domain="gnome-shell-extensions">
-	<schema
-		id="org.gnome.shell.extensions.crypto-stash"
-		path="/org/gnome/shell/extensions/crypto-stash/">
+  <schema
+    id="org.gnome.shell.extensions.crypto-stash"
+    path="/org/gnome/shell/extensions/crypto-stash/">
 
-		<key name="stashes" type="as">
-			<default>[]</default>
-		</key>
-	</schema>
+    <key name="stashes" type="as">
+      <default>[]</default>
+    </key>
+  </schema>
 </schemalist>

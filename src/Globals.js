@@ -1,7 +1,6 @@
-
-var GET_CRYPTO_ASSETS_URL = 'https://api.coincap.io/v2/assets?limit=100';
-var GET_CONVERSION_RATES_URL = 'https://api.coincap.io/v2/rates/euro';
-var STORAGE_KEY_STASHES = "stashes";
+var GET_CRYPTO_ASSETS_URL = 'https://api.coincap.io/v2/assets?limit=100'
+var GET_CONVERSION_RATES_URL = 'https://api.coincap.io/v2/rates/euro'
+var STORAGE_KEY_STASHES = 'stashes'
 var DEFAULT_STASH = {
   name: 'New Stash',
   visible: true,
@@ -11,4 +10,4 @@ var DEFAULT_STASH = {
   ]
 }
 
-var AVAILABLE_CURRENCIES = ['USD', 'EUR'];
+var AVAILABLE_CURRENCIES = ['USD', 'EUR']

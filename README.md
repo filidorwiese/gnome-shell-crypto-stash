@@ -14,7 +14,8 @@ You can freely configure stashes in the preferences screen:
 
 <img src="https://raw.githubusercontent.com/filidorwiese/gnome-shell-crypto-stash/main/screens/preferences.png">
 
-CryptoStash uses the free [CoinCap.io](https://coincap.io/) api and has been inspired on Otto Allmendinger's [Bitcoin Markets](https://github.com/OttoAllmendinger/gnome-shell-bitcoin-markets/) extension.
+CryptoStash uses the free [CoinCap.io](https://coincap.io/) api and has been inspired on Otto
+Allmendinger's [Bitcoin Markets](https://github.com/OttoAllmendinger/gnome-shell-bitcoin-markets/) extension.
 
 ## Installation
 

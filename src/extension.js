@@ -168,10 +168,10 @@ let IndicatorCollection = new Lang.Class({
 
     let indicators = stashes
       .map(JSON.parse)
-      .filter((s) => s.visible);
+      .filter((s) => s.visible)
 
     if (indicators.length) {
-      _api.startPolling();
+      _api.startPolling()
       indicators.forEach((s) => {
         try {
           this.add(new StashIndicaterView(s))
@@ -180,7 +180,7 @@ let IndicatorCollection = new Lang.Class({
         }
       })
     } else {
-      _api.stopPolling();
+      _api.stopPolling()
     }
   },
 
