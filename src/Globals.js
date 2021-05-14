@@ -11,3 +11,8 @@ var DEFAULT_STASH = {
 }
 
 var AVAILABLE_CURRENCIES = ['USD', 'EUR']
+var SYMBOLS = {
+  error: '\u26A0',
+  refresh: '\u27f3',
+  wallet: '👛'
+}

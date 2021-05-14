@@ -12,12 +12,6 @@ const Globals = Local.imports.Globals
 const CoinCapApi = Local.imports.CoinCapApi
 const IndicatorModel = Local.imports.IndicatorModel.IndicatorModel
 
-const _Symbols = {
-  error: '\u26A0',
-  refresh: '\u27f3',
-  wallet: '👛'
-}
-
 let _indicatorCollection
 let _api
 
@@ -96,7 +90,7 @@ const StashIndicaterView = new Lang.Class({
     this._model = new IndicatorModel(this._api, this._stash)
 
     this._model.connect('update-start', () => {
-      this._displayStatus(_Symbols.refresh)
+      this._displayStatus(Globals.SYMBOLS.refresh)
     })
 
     this._model.connect('update', (obj, err, stash) => {
@@ -107,20 +101,20 @@ const StashIndicaterView = new Lang.Class({
       }
     })
 
-    this._displayStatus(_Symbols.refresh)
+    this._displayStatus(Globals.SYMBOLS.refresh)
   },
 
   _showError: function () {
-    this._displayStatus(_Symbols.error)
+    this._displayStatus(Globals.SYMBOLS.error)
   },
 
   _showData: function (stash) {
     this._displayText(stash.currency + ' ' + stash.totalValue)
-    this._displayStatus(_Symbols.wallet)
-    this._popupItemTitle.label.clutter_text.set_markup(`👛 <b>${stash.name}</b>`)
+    this._displayStatus(Globals.SYMBOLS.wallet)
+    this._popupItemTitle.label.clutter_text.set_markup(`${Globals.SYMBOLS.wallet} <b>${stash.name}</b>`)
 
     this._popupItemBreakdown.label.clutter_text.set_markup(`${stash.stash.map((c) => {
-      return `${c.amount.toFixed(3)} ${c.asset} × ${stash.currency} ${c.value.toFixed(2)}\t = ${stash.currency} ${c.totalValue.toFixed(0)}`
+      return `${c.amount.toFixed(3)} ${c.asset} × ${stash.currency} ${c.value.toFixed(2)}\t = \t${stash.currency} ${c.totalValue.toFixed(0)}`
     }).join('\n')}`)
   },
 

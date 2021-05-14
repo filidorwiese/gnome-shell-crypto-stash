@@ -1,6 +1,5 @@
 const Lang = imports.lang
 const Signals = imports.signals
-
 const Gtk = imports.gi.Gtk
 const GObject = imports.gi.GObject
 
