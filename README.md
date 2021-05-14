@@ -14,9 +14,16 @@ You can freely configure stashes in the preferences screen:
 
 <img src="https://raw.githubusercontent.com/filidorwiese/gnome-shell-crypto-stash/main/screens/preferences.png">
 
-CryptoStash uses the free [CoinCap.io](https://coincap.io/) api and has been inspired on Otto
+CryptoStash has been inspired on Otto
 Allmendinger's [Bitcoin Markets](https://github.com/OttoAllmendinger/gnome-shell-bitcoin-markets/) extension.
 
 ## Installation
 
 Find the extension on https://extensions.gnome.org to install.
+
+## Privacy notice
+This extension uses the free [CoinCap.io](https://coincap.io/) api to retrieve:
+- global averages of the top 100 crypto coins
+- fiat conversion rates, for example USD->EUR
+
+All calculations are done at the client-side. At no point will any crypto data stored by this extension leave your computer. But do note that your public ipaddress might be recorded by CoinCap.io.
