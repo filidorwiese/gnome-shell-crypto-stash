@@ -1,7 +1,7 @@
 {
   "name": "CryptoStash \uD83D\uDC5B",
   "title": "CryptoStash",
-  "description": "Gnome Shell extension to monitor your crytocurrency stash",
+  "description": "Keep an eye on the real time value of your crypto coins.",
   "shell-version": [
     "3.36",
     "3.38"
