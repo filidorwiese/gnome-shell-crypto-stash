@@ -277,7 +277,8 @@ var StashConfigView = new Lang.Class({
         // Set asset amount/symbol to selected asset
         const symbol = this._listAssetsStore.get_value(iter, 0)
         const amount = this._listAssetsStore.get_value(iter, 1)
-        this.addAssetAmount.set_text(amount)
+
+        this.addAssetAmount.set_text(amount.replace(',', '.'))
         let [res, iter2] = this.addAssetSymbol.model.get_iter_first()
         while (res) {
           if (this.addAssetSymbol.model.get_value(iter2, 0) === symbol) {
