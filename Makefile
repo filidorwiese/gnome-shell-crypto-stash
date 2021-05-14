@@ -11,7 +11,7 @@ package: $(ZIPFILE)
 
 $(ZIPFILE): src/metadata.json schemas
 	-rm -f $(ZIPFILE)
-	cd src/ && zip ../$(ZIPFILE) *
+	cd src/ && zip ../$(ZIPFILE) * schemas/*
 
 .PHONY: schemas
 schemas:
