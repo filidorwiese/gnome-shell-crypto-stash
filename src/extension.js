@@ -114,7 +114,9 @@ const StashIndicaterView = new Lang.Class({
     this._popupItemTitle.label.clutter_text.set_markup(`${Globals.SYMBOLS.wallet} <b>${stash.name}</b>`)
 
     this._popupItemBreakdown.label.clutter_text.set_markup(`${stash.stash.map((c) => {
-      return `${c.amount.toFixed(3)} ${c.asset} × ${stash.currency} ${c.value.toFixed(2)}\t = \t${stash.currency} ${c.totalValue.toFixed(0)}`
+      const left = `${c.amount.toFixed(3)} ${c.asset} × ${stash.currency} ${c.value.toFixed(2)}`
+      const right = `${stash.currency} ${c.totalValue.toFixed(0)}`
+      return `<span font_family="monospace">${left}\t= ${right}</span>`
     }).join('\n')}`)
   },
 
