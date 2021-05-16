@@ -43,7 +43,8 @@ var IndicatorModel = new Lang.Class({
   },
 
   _calculateStash: function () {
-    let stash = this._stash.assets.map((a) => {
+    const investment = this._stash.hasOwnProperty('investment') ? this._stash.investment : 0
+    const stash = this._stash.assets.map((a) => {
       const amount = parseFloat(String(a.amount).replace(',', '.'))
       const assetRate = this._handler.cryptoRates.filter((c) => c.symbol === a.symbol)
       let assetPrice = assetRate.length ? parseFloat(assetRate[0].priceUsd) : 0
@@ -60,9 +61,9 @@ var IndicatorModel = new Lang.Class({
       }
     })
 
-    let totalValue = stash.reduce((acc, a) => {
+    const totalValue = stash.reduce((acc, a) => {
       return acc + a.totalValue
-    }, 0)
+    }, 0) - investment
 
     let currencySymbol = '$'
     if (this._stash.currency === 'EUR') {
@@ -71,6 +72,7 @@ var IndicatorModel = new Lang.Class({
 
     return {
       name: this._stash.name,
+      investment,
       totalValue: parseInt(totalValue),
       currency: currencySymbol,
       stash,

@@ -5,6 +5,7 @@ var DEFAULT_STASH = {
   name: 'New Stash',
   visible: true,
   currency: 'USD',
+  investment: 0,
   assets: [
     {symbol: 'BTC', amount: 1},
   ]

@@ -113,11 +113,17 @@ const StashIndicaterView = new Lang.Class({
     this._displayStatus(Globals.SYMBOLS.wallet)
     this._popupItemTitle.label.clutter_text.set_markup(`${Globals.SYMBOLS.wallet} <b>${stash.name}</b>`)
 
-    this._popupItemBreakdown.label.clutter_text.set_markup(`${stash.stash.map((c) => {
+    const breakdown = stash.stash.map((c) => {
       const left = `${c.amount.toFixed(3)} ${c.asset} × ${stash.currency} ${c.value.toFixed(2)}`
       const right = `${stash.currency} ${c.totalValue.toFixed(0)}`
       return `<span font_family="monospace">${left}\t= ${right}</span>`
-    }).join('\n')}`)
+    });
+
+    if (stash.investment > 0) {
+      breakdown.push(`<span font_family="monospace">Investment\t\t= ${stash.currency} ${stash.investment * -1}</span>`)
+    }
+
+    this._popupItemBreakdown.label.clutter_text.set_markup(breakdown.join('\n'))
   },
 
   _displayStatus: function (text) {

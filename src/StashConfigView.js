@@ -108,6 +108,7 @@ var StashConfigView = new Lang.Class({
     this._layoutStashSettings.add(this._confName())
     this._layoutStashSettings.add(this._confVisible())
     this._layoutStashSettings.add(this._confCurrency())
+    this._layoutStashSettings.add(this._confInvestment())
 
     this._layoutAssetsSettings.add(this._confAssetsCollection())
     this._layoutAssetsSettings.add(new Gtk.Separator())
@@ -121,7 +122,8 @@ var StashConfigView = new Lang.Class({
 
     let nameView = new Gtk.Entry({
       'max-length': 20,
-      text: preset
+      text: preset,
+      xalign: 1
     })
 
     nameView.connect('notify::text', () => {
@@ -150,7 +152,7 @@ var StashConfigView = new Lang.Class({
       (v, i) => ({label: v, value: v, active: (v === preset)})
     )
     const currencyView = new ComboBoxView(options)
-    currencyView.connect('changed', (obj) => {
+    currencyView.connect('changed', () => {
       let [success, iter] = currencyView.widget.get_active_iter()
       if (!success) return
       let symbol = currencyView.model.get_value(iter, 0)
@@ -158,6 +160,26 @@ var StashConfigView = new Lang.Class({
     })
 
     return makeConfigRow('Native currency', currencyView.widget)
+  },
+
+  _confInvestment: function () {
+    let preset = this._config.get('investment') || '0'
+
+    let investmentView = new Gtk.Entry({
+      'max-length': 20,
+      text: String(parseInt(preset)),
+      xalign: 1
+    })
+
+    investmentView.connect('notify::text', () => {
+      const value = parseInt(investmentView.get_text()) || 0;
+      this._config.set('investment', value)
+      if (investmentView.get_text() !== String(value) && String(value) > 0) {
+        investmentView.set_text(String(value))
+      }
+    })
+
+    return makeConfigRow('Deduct investment', investmentView)
   },
 
   _confAssetsCollection: function () {
