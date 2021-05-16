@@ -19,7 +19,9 @@ Allmendinger's [Bitcoin Markets](https://github.com/OttoAllmendinger/gnome-shell
 
 ## Installation
 
-Find the extension on https://extensions.gnome.org to install.
+The recommended way to install is using the Gnome extensions website, go to https://extensions.gnome.org/extension/4276/cryptostash/ and toggle the extension to "On".
+
+Alternatively you can clone this repo and install with `make install`. This method needs `git`, `jq`, `zip` and `make` to be installed on your system.
 
 ## Privacy notice
 This extension uses the free [CoinCap.io](https://coincap.io/) api to retrieve:
