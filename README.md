@@ -1,8 +1,8 @@
 # CryptoStash
 
-A gnome-shell extension to keep an eye on the real time value of your crypto collection.
+A gnome-shell extension to keep an eye on the real time value of your crypto collections.
 
-You can create multiple "stashes" (portfolios) of coins and monitor the accumulate value in USD or EUR:
+You can create multiple "stashes" (portfolios) of coins and monitor the accumulated value in USD or EUR:
 
 <img src="https://raw.githubusercontent.com/filidorwiese/gnome-shell-crypto-stash/main/screens/extension1.png">
 
