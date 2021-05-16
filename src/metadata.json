@@ -8,6 +8,6 @@
   "url": "https://github.com/filidorwiese/gnome-shell-crypto-stash",
   "author_url": "https://filidorwiese.nl",
   "uuid": "cryptostash@filidorwiese.nl",
-  "version": 1.01,
+  "version": 1.10,
   "settings-schema": "org.gnome.shell.extensions.crypto-stash"
 }
