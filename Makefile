@@ -1,4 +1,4 @@
-NAME := $(shell jq '.title' ./src/metadata.json)
+NAME := $(shell jq '.name' ./src/metadata.json)
 UUID := $(shell jq '.uuid' ./src/metadata.json)
 VERSION := $(shell jq '.version' ./src/metadata.json)
 

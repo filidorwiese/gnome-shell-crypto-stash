@@ -25,7 +25,7 @@ var isErrTooManyRequests = (err) =>
   err.soupMessage.status_code &&
   Number(err.soupMessage.status_code) === STATUS_TOO_MANY_REQUESTS
 
-const _userAgent = `${Local.metadata['title']}/${Local.metadata.version}/Gnome ${Config.PACKAGE_VERSION} (${Local.metadata['url']})`
+const _userAgent = `${Local.metadata['name']}/${Local.metadata.version}/Gnome ${Config.PACKAGE_VERSION} (${Local.metadata['url']})`
 const _httpSession = new Soup.SessionAsync()
 _httpSession['user-agent'] = _userAgent
 
