@@ -66,7 +66,8 @@ var CoinCapApi = new Lang.Class({
       })
 
       this._signalTimeout = Mainloop.timeout_add_seconds(
-        this.interval, loop
+        this.interval,
+        loop
       )
     }
 
@@ -79,6 +80,10 @@ var CoinCapApi = new Lang.Class({
 
   getCurrencyRates: function (callback) {
     HTTP.getJSON(Globals.GET_CONVERSION_RATES_URL, callback)
+  },
+
+  isPolling: function() {
+    return typeof this._signalTimeout !== 'undefined'
   },
 
   stopPolling: function () {

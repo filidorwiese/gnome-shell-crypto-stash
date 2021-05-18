@@ -117,7 +117,7 @@ const StashIndicaterView = new Lang.Class({
       const left = `${c.amount.toFixed(3)} ${c.asset} × ${stash.currency} ${c.value.toFixed(2)}`
       const right = `${stash.currency} ${c.totalValue.toFixed(0)}`
       return `<span font_family="monospace">${left}\t= ${right}</span>`
-    });
+    })
 
     if (stash.investment > 0) {
       breakdown.push(`<span font_family="monospace">Investment\t\t= ${stash.currency} ${stash.investment * -1}</span>`)
@@ -159,7 +159,7 @@ let IndicatorCollection = new Lang.Class({
   },
 
   _createIndicators: function () {
-    this._removeAll()
+    this.removeAll()
 
     let stashes = this._settings.get_strv(Globals.STORAGE_KEY_STASHES)
 
@@ -173,7 +173,9 @@ let IndicatorCollection = new Lang.Class({
       .filter((s) => s.visible)
 
     if (indicators.length) {
-      _api.startPolling()
+      if (!_api.isPolling()) {
+        _api.startPolling()
+      }
       indicators.forEach((s) => {
         try {
           this.add(new StashIndicaterView(s))
@@ -186,7 +188,7 @@ let IndicatorCollection = new Lang.Class({
     }
   },
 
-  _removeAll: function () {
+  removeAll: function() {
     this._indicators.forEach((i) => i.destroy())
     this._indicators = []
   },
@@ -198,7 +200,7 @@ let IndicatorCollection = new Lang.Class({
   },
 
   destroy: function () {
-    this._removeAll()
+    this.removeAll()
     this._settings.disconnect(this._settingsChangedId)
   }
 })
