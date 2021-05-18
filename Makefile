@@ -1,8 +1,8 @@
 NAME := $(shell jq '.name' ./src/metadata.json)
 UUID := $(shell jq '.uuid' ./src/metadata.json)
-VERSION := $(shell jq '.version' ./src/metadata.json)
+TAG := $(shell jq '.tag' ./src/metadata.json)
 
-ZIPFILE = archives/$(NAME)-v${VERSION}.zip
+ZIPFILE = archives/$(NAME)-v${TAG}.zip
 EXTENSION_PATH_RELATIVE=.local/share/gnome-shell/extensions/$(UUID)
 EXTENSION_PATH = $(HOME)/$(EXTENSION_PATH_RELATIVE)
 

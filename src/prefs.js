@@ -84,7 +84,7 @@ const MyPrefsWidget = GObject.registerClass(
         margin: 50,
         visible: true,
         justify: 2,
-        label: `<span size="xx-large">${Globals.SYMBOLS.wallet}</span>\n\n${Local.metadata['name']} v${Local.metadata['version'].toFixed(2)}\n\nAuthor: <a href="${Local.metadata['author_url']}">Filidor Wiese</a>\n\nRepository: <a href="${Local.metadata['url']}">${Local.metadata['url']}</a>`,
+        label: `<span size="xx-large">${Globals.SYMBOLS.wallet}</span>\n\n${Local.metadata['name']} v${Local.metadata['tag'].toFixed(2)}\n\nAuthor: <a href="${Local.metadata['author_url']}">Filidor Wiese</a>\n\nRepository: <a href="${Local.metadata['url']}">${Local.metadata['url']}</a>`,
         useMarkup: true,
         xalign: 0,
         expand: true
