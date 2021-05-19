@@ -70,10 +70,12 @@ var IndicatorModel = new Lang.Class({
       currencySymbol = '€'
     }
 
+    const nativeValuePrecision = Math.abs(totalValue) < 10 ? 2 : 0
+
     return {
       name: this._stash.name,
       investment,
-      totalValue: parseInt(totalValue),
+      totalValue: totalValue.toFixed(nativeValuePrecision),
       currency: currencySymbol,
       stash,
     }

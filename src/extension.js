@@ -114,8 +114,9 @@ const StashIndicaterView = new Lang.Class({
     this._popupItemTitle.label.clutter_text.set_markup(`${Globals.SYMBOLS.wallet} <b>${stash.name}</b>`)
 
     const breakdown = stash.stash.map((c) => {
+      const nativeValuePrecision = Math.abs(c.totalValue) < 10 ? 2 : 0
       const left = `${new Intl.NumberFormat().format(c.amount.toFixed(3))} ${c.asset} × ${stash.currency} ${new Intl.NumberFormat().format(c.value.toFixed(2))}`
-      const right = `${stash.currency} ${new Intl.NumberFormat().format(c.totalValue.toFixed(0))}`
+      const right = `${stash.currency} ${new Intl.NumberFormat().format(c.totalValue.toFixed(nativeValuePrecision))}`
       return `<span font_family="monospace">${left}\t= ${right}</span>`
     })
 
