@@ -109,19 +109,23 @@ const StashIndicaterView = new Lang.Class({
   },
 
   _showData: function (stash) {
-    this._displayText(stash.currency + ' ' + new Intl.NumberFormat().format(stash.totalValue))
+    const formatCurrency = (value, precision) => {
+      const minimumFractionDigits = typeof precision !== 'undefined' ? precision : Math.abs(value) < 100 ? 2 : 0;
+      return new Intl.NumberFormat('en-US', {minimumFractionDigits, maximumFractionDigits: minimumFractionDigits}).format(value);
+    }
+
+    this._displayText(stash.currency + ' ' + formatCurrency(stash.totalValue))
     this._displayStatus(Globals.SYMBOLS.wallet)
     this._popupItemTitle.label.clutter_text.set_markup(`${Globals.SYMBOLS.wallet} <b>${stash.name}</b>`)
 
     const breakdown = stash.stash.map((c) => {
-      const nativeValuePrecision = Math.abs(c.totalValue) < 10 ? 2 : 0
-      const left = `${new Intl.NumberFormat().format(c.amount.toFixed(3))} ${c.asset} × ${stash.currency} ${new Intl.NumberFormat().format(c.value.toFixed(2))}`
-      const right = `${stash.currency} ${new Intl.NumberFormat().format(c.totalValue.toFixed(nativeValuePrecision))}`
+      const left = `${formatCurrency(c.amount, 3)} ${c.asset} × ${stash.currency} ${formatCurrency(c.value)}`
+      const right = `${stash.currency} ${formatCurrency(c.totalValue)}`
       return `<span font_family="monospace">${left}\t= ${right}</span>`
     })
 
     if (stash.investment > 0) {
-      breakdown.push(`<span font_family="monospace">Investment\t\t= ${stash.currency} ${new Intl.NumberFormat().format(stash.investment * -1)}</span>`)
+      breakdown.push(`<span font_family="monospace">Investment\t\t= ${stash.currency} ${formatCurrency(stash.investment * -1)}</span>`)
     }
 
     this._popupItemBreakdown.label.clutter_text.set_markup(breakdown.join('\n'))
