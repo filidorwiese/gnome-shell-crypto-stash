@@ -54,11 +54,6 @@ var StashModel = new GObject.Class({
 
     this._reloadFromSettings()
 
-    // this._settingsChangedId = this._settings.connect(
-    //   'changed::' + Globals.STORAGE_KEY_STASHES,
-    //   this._reloadFromSettings.bind(this)
-    // );
-
     var flag
 
     let mutex = (func) =>

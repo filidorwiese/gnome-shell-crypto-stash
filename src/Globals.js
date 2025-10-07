@@ -1,5 +1,5 @@
-var GET_CRYPTO_ASSETS_URL = 'https://api.coincap.io/v2/assets?limit=100'
-var GET_CONVERSION_RATES_URL = 'https://api.coincap.io/v2/rates/euro'
+var GET_CRYPTO_RATES_URL = 'https://cryptostash.filidorwiese.nl/coins.json'
+var GET_FIAT_RATES_URL = 'https://cryptostash.filidorwiese.nl/rates.json'
 var STORAGE_KEY_STASHES = 'stashes'
 var DEFAULT_STASH = {
   name: 'New Stash',

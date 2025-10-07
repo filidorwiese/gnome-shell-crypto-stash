@@ -1,195 +1,238 @@
-const GObject = imports.gi.GObject
-const Gtk = imports.gi.Gtk
+const Gtk = imports.gi.Gtk;
+const GObject = imports.gi.GObject;
+const Gio = imports.gi.Gio;
+const GLib = imports.gi.GLib;
 
-const ExtensionUtils = imports.misc.extensionUtils
-const Local = ExtensionUtils.getCurrentExtension()
-const HTTP = Local.imports.HTTP
-const Globals = Local.imports.Globals
+const ExtensionUtils = imports.misc.extensionUtils;
+const Me = ExtensionUtils.getCurrentExtension();
 
-const StashModel =
-  Local.imports.StashModel.StashModel
-const StashConfigView =
-  Local.imports.StashConfigView.StashConfigView
+function init() {
+}
 
-function init () {}
+function buildPrefsWidget() {
+    const widget = new MyPrefsWidget();
 
-function buildPrefsWidget () {
-  let widget = new MyPrefsWidget()
-  widget.show_all()
-  return widget
+    // GTK4 doesn't need show_all anymore, but for GTK3 compatibility
+    if (widget.show_all) {
+        widget.show_all();
+    }
+
+    return widget;
 }
 
 const MyPrefsWidget = GObject.registerClass(
-  class MyPrefsWidget extends Gtk.Box {
+class MyPrefsWidget extends Gtk.Box {
+    _init() {
+        super._init({
+            orientation: Gtk.Orientation.HORIZONTAL,
+            spacing: 12,
+            hexpand: true,
+            vexpand: true
+        });
 
-    _init () {
-      super._init({
-        orientation: Gtk.Orientation.HORIZONTAL,
-        margin: 10,
-        width_request: 600
-      })
+        this._settings = ExtensionUtils.getSettings('org.gnome.shell.extensions.crypto-stash');
+        this._path = Me.path;
 
-      this.loadCoinCapCoins()
+        this.loadCryptoRates();
     }
 
-    loadCoinCapCoins () {
-      this._loadingText = new Gtk.Label({
-        visible: true,
-        justify: 1,
-        label: `Loading assets from coincap.io`,
-        expand: true,
-        xalign: 0.5
-      })
-      this.add(this._loadingText)
+    loadCryptoRates() {
+        this._loadingText = new Gtk.Label({
+            visible: true,
+            justify: Gtk.Justification.CENTER,
+            label: 'Loading crypto rates',
+            hexpand: true,
+            vexpand: true
+        });
+        this.append(this._loadingText);
 
-      // Load available assets from coincap.io
-      this.availableCoins = ['BTC']
-      HTTP.getJSON(Globals.GET_CRYPTO_ASSETS_URL, (_, data) => {
-        if (data.hasOwnProperty('data') && data.data.length > 0) {
-          this.availableCoins = data.data.map((c) => c.symbol).sort((a, b) => {
-            if (a > b) return 1
-            if (a < b) return -1
-            return 0
-          })
+        this.availableCoins = ['BTC'];
+
+        // Load modules using legacy imports
+        const loadLegacyModule = (moduleName) => {
+            imports.searchPath.unshift(this._path);
+            try {
+                return imports[moduleName.replace('.js', '')];
+            } finally {
+                imports.searchPath.shift();
+            }
+        };
+
+        const HTTP = loadLegacyModule('HTTP.js');
+        const Globals = loadLegacyModule('Globals.js');
+        this._Globals = Globals;
+
+        HTTP.getJSON(Globals.GET_CRYPTO_RATES_URL, (_, data) => {
+            if (data && data.hasOwnProperty('data') && data.data.length > 0) {
+                this.availableCoins = data.data.map((c) => c.symbol).sort((a, b) => {
+                    if (a > b) return 1;
+                    if (a < b) return -1;
+                    return 0;
+                });
+            }
+
+            this.remove(this._loadingText);
+            this.render();
+        });
+    }
+
+    render() {
+        const loadLegacyModule = (moduleName) => {
+            imports.searchPath.unshift(this._path);
+            try {
+                return imports[moduleName.replace('.js', '')];
+            } finally {
+                imports.searchPath.shift();
+            }
+        };
+
+        const StashModel = loadLegacyModule('StashModel.js');
+        this._store = new StashModel.StashModel();
+
+        const sidebar = new Gtk.Box({
+            orientation: Gtk.Orientation.VERTICAL,
+            width_request: 200
+        });
+        sidebar.append(this._getTreeView());
+        sidebar.append(this._getToolbar());
+        this.append(sidebar);
+
+        this._configLayout = new Gtk.Box({
+            orientation: Gtk.Orientation.HORIZONTAL,
+            hexpand: true,
+            width_request: 500
+        });
+        this.append(this._configLayout);
+
+        const metadata = Me.metadata;
+
+        this._introText = new Gtk.Label({
+            visible: true,
+            justify: Gtk.Justification.LEFT,
+            label: `${this._Globals.SYMBOLS.wallet}\n\n${metadata['name']} v${metadata['tag'].toFixed(2)}\n\nAuthor: ${metadata['author_url']}\n\nRepository: ${metadata['url']}`,
+            use_markup: true,
+            xalign: 0,
+            hexpand: true,
+            vexpand: true
+        });
+        this._configLayout.append(this._introText);
+
+        this._selection = this._treeView.get_selection();
+        this._selection.connect('changed', this._onSelectionChanged.bind(this));
+    }
+
+    _getTreeView() {
+        this._treeView = new Gtk.TreeView({
+            model: this._store,
+            headers_visible: false,
+            reorderable: true,
+            hexpand: false,
+            vexpand: true
+        });
+
+        let label = new Gtk.TreeViewColumn({title: 'Stashes'});
+        let renderer = new Gtk.CellRendererText();
+        label.pack_start(renderer, true);
+        label.add_attribute(renderer, 'text', 0);
+        this._treeView.insert_column(label, 0);
+
+        return this._treeView;
+    }
+
+    _onSelectionChanged() {
+        let [isSelected, , iter] = this._selection.get_selected();
+
+        if (isSelected) {
+            this._showStashConfig(this._store.getConfig(iter));
+            this._introText.visible = false;
+        } else {
+            this._showStashConfig(null);
+            this._introText.visible = true;
         }
 
-        this.remove(this._loadingText)
-        this.render()
-      })
+        this._updateToolbar();
     }
 
-    render () {
-      this._store = new StashModel()
+    _showStashConfig(config) {
+        if (this._stashConfigView) {
+            this._configLayout.remove(this._stashConfigView.widget);
+            this._stashConfigView.destroy();
+            this._stashConfigView = null;
+        }
 
-      /* sidebar (left) */
-      let sidebar = new Gtk.Box({
-        margin: 10,
-        orientation: Gtk.Orientation.VERTICAL,
-        width_request: 200
-      })
-      sidebar.add(this._getTreeView())
-      sidebar.add(this._getToolbar())
-      this.add(sidebar)
+        if (config === null) {
+            return;
+        }
 
-      /* config (right) */
-      this._configLayout = new Gtk.Box({
-        margin: 10,
-        orientation: Gtk.Orientation.HORIZONTAL,
-        expand: true,
-        width_request: 200
-      })
-      this.add(this._configLayout)
+        const loadLegacyModule = (moduleName) => {
+            imports.searchPath.unshift(this._path);
+            try {
+                return imports[moduleName.replace('.js', '')];
+            } finally {
+                imports.searchPath.shift();
+            }
+        };
 
-      this._introText = new Gtk.Label({
-        margin: 50,
-        visible: true,
-        justify: 2,
-        label: `<span size="xx-large">${Globals.SYMBOLS.wallet}</span>\n\n${Local.metadata['name']} v${Local.metadata['tag'].toFixed(2)}\n\nAuthor: <a href="${Local.metadata['author_url']}">Filidor Wiese</a>\n\nRepository: <a href="${Local.metadata['url']}">${Local.metadata['url']}</a>`,
-        useMarkup: true,
-        xalign: 0,
-        expand: true
-      })
-      this._configLayout.add(this._introText)
-
-      /* behavior */
-      this._selection = this._treeView.get_selection()
-      this._selection.connect('changed', this._onSelectionChanged.bind(this))
-
-      this.show_all()
+        const StashConfigView = loadLegacyModule('StashConfigView.js');
+        this._stashConfigView = new StashConfigView.StashConfigView(config, this.availableCoins);
+        this._configLayout.append(this._stashConfigView.widget);
     }
 
-    _getTreeView () {
-      this._treeView = new Gtk.TreeView({
-        model: this._store,
-        headers_visible: false,
-        reorderable: true,
-        hexpand: false,
-        vexpand: true
-      })
+    _getToolbar() {
+        let toolbar = this._toolbar = new Gtk.Box({
+            orientation: Gtk.Orientation.HORIZONTAL,
+            spacing: 0
+        });
 
-      let label = new Gtk.TreeViewColumn({title: 'Stashes'})
-      let renderer = new Gtk.CellRendererText()
-      label.pack_start(renderer, true)
-      label.add_attribute(renderer, 'text', 0)
-      this._treeView.insert_column(label, 0)
+        // add_css_class is GTK4, use get_style_context for GTK3
+        if (toolbar.add_css_class) {
+            toolbar.add_css_class('toolbar');
+        } else {
+            toolbar.get_style_context().add_class('toolbar');
+        }
 
-      return this._treeView
+        let newButton = new Gtk.Button({
+            icon_name: 'list-add-symbolic',
+            has_frame: false
+        });
+        newButton.connect('clicked', this._addClicked.bind(this));
+        toolbar.append(newButton);
+
+        let delButton = this._delButton = new Gtk.Button({
+            icon_name: 'list-remove-symbolic',
+            has_frame: false
+        });
+        delButton.connect('clicked', this._delClicked.bind(this));
+        toolbar.append(delButton);
+
+        this._updateToolbar();
+
+        return toolbar;
     }
 
-    _onSelectionChanged () {
-      let [isSelected, , iter] = this._selection.get_selected()
+    _updateToolbar() {
+        let sensitive = false;
 
-      if (isSelected) {
-        this._showStashConfig(this._store.getConfig(iter))
-        this._introText.visible = false
-      } else {
-        this._showStashConfig(null)
-        this._introText.visible = true
-      }
+        if (this._selection) {
+            let [isSelected] = this._selection.get_selected();
+            sensitive = isSelected;
+        }
 
-      this._updateToolbar()
+        this._delButton.set_sensitive(sensitive);
     }
 
-    _showStashConfig (config) {
-      if (this._stashConfigView) {
-        this._configLayout.remove(this._stashConfigView.widget)
-        this._stashConfigView.destroy()
-        this._stashConfigView = null
-      }
-
-      if (config === null) {
-        return
-      }
-
-      this._stashConfigView = new StashConfigView(config, this.availableCoins)
-      this._configLayout.add(this._stashConfigView.widget)
+    _addClicked() {
+        this._store.append();
+        this._updateToolbar();
     }
 
-    _getToolbar () {
-      let toolbar = this._toolbar = new Gtk.Toolbar({
-        icon_size: 1
-      })
+    _delClicked() {
+        let [isSelected, , iter] = this._selection.get_selected();
 
-      toolbar.get_style_context().add_class(Gtk.STYLE_CLASS_INLINE_TOOLBAR)
+        if (isSelected) {
+            this._store.remove(iter);
+        }
 
-      let newButton = new Gtk.ToolButton({icon_name: 'list-add-symbolic'})
-      newButton.connect('clicked', this._addClicked.bind(this))
-      toolbar.add(newButton)
-
-      let delButton = this._delButton = new Gtk.ToolButton({icon_name: 'list-remove-symbolic'})
-      delButton.connect('clicked', this._delClicked.bind(this))
-      toolbar.add(delButton)
-
-      this._updateToolbar()
-
-      return toolbar
+        this._updateToolbar();
     }
-
-    _updateToolbar () {
-      let sensitive = false
-
-      if (this._selection) {
-        let [isSelected] = this._selection.get_selected()
-        sensitive = isSelected
-      }
-
-      this._delButton.set_sensitive(sensitive)
-    }
-
-    _addClicked () {
-      this._store.append()
-      this._updateToolbar()
-    }
-
-    _delClicked () {
-      let [isSelected, , iter] = this._selection.get_selected()
-
-      if (isSelected) {
-        this._store.remove(iter)
-      }
-
-      this._updateToolbar()
-    }
-
-  }
-)
+});

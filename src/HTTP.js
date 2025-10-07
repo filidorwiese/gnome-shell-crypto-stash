@@ -1,3 +1,4 @@
+imports.gi.versions.Soup = '3.0'
 const Soup = imports.gi.Soup
 const Local = imports.misc.extensionUtils.getCurrentExtension()
 const Config = imports.misc.config
@@ -26,35 +27,44 @@ var isErrTooManyRequests = (err) =>
   Number(err.soupMessage.status_code) === STATUS_TOO_MANY_REQUESTS
 
 const _userAgent = `${Local.metadata['name']}/${Local.metadata.tag}/Gnome ${Config.PACKAGE_VERSION} (${Local.metadata['url']})`
-const _httpSession = new Soup.SessionAsync()
+const _httpSession = new Soup.Session()
 _httpSession['user-agent'] = _userAgent
 
-Soup.Session.prototype.add_feature.call(
-  _httpSession,
-  new Soup.ProxyResolverDefault()
-)
+// ProxyResolverDefault is deprecated, proxy resolution is automatic in modern libsoup
 
 var getJSON = (url, callback) => {
   let message = Soup.Message.new('GET', url)
   let headers = message.request_headers
   headers.append('X-Client', _userAgent)
-  _httpSession.queue_message(
+
+  // Use send_and_read_async for libsoup 3.x
+  _httpSession.send_and_read_async(
     message,
-    (session, message) => {
-      if (message.status_code === 200) {
-        let data
-        try {
-          data = JSON.parse(message.response_body.data)
-        } catch (e) {
-          callback(
-            new Error(`GET ${url}: error parsing JSON: ${e}`), null
-          )
-        }
-        if (data) {
+    0,
+    null,
+    (session, result) => {
+      try {
+        let bytes = session.send_and_read_finish(result)
+
+        if (message.status_code === 200) {
+          let decoder = new TextDecoder('utf-8')
+          let text = decoder.decode(bytes.get_data())
+
+          let data
+          try {
+            data = JSON.parse(text)
+          } catch (e) {
+            callback(
+              new Error(`GET ${url}: error parsing JSON: ${e}`), null
+            )
+            return
+          }
           callback(null, data)
+        } else {
+          callback(new HTTPError(message), null)
         }
-      } else {
-        callback(new HTTPError(message), null)
+      } catch (e) {
+        callback(new Error(`GET ${url}: ${e}`), null)
       }
     }
   )

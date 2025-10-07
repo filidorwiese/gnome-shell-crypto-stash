@@ -6,10 +6,10 @@ const Local = imports.misc.extensionUtils.getCurrentExtension()
 const HTTP = Local.imports.HTTP
 const Globals = Local.imports.Globals
 
-const defaultInterval = 60
+const defaultInterval = 3600
 
-var CoinCapApi = new Lang.Class({
-  Name: 'CoinCapApi',
+var CryptoRatesApi = new Lang.Class({
+  Name: 'CryptoRatesApi',
 
   interval: defaultInterval,
 
@@ -32,7 +32,7 @@ var CoinCapApi = new Lang.Class({
           } else {
             logError(error)
           }
-          this.emit('update-crypto-rates', 'coincap.io api request failed')
+          this.emit('update-crypto-rates', 'api request failed')
         } else {
           if (data.hasOwnProperty('data') && data.data.length > 0) {
             this.cryptoRates = data.data
@@ -45,7 +45,7 @@ var CoinCapApi = new Lang.Class({
       })
 
       // Get currency conversion rates
-      this.getCurrencyRates((error, data) => {
+      this.getFiatRates((error, data) => {
         if (error) {
           if (HTTP.isErrTooManyRequests(error)) {
             logError(`${Local.metadata['name']}: http error: too many requests`)
@@ -53,7 +53,7 @@ var CoinCapApi = new Lang.Class({
           } else {
             logError(error)
           }
-          this.emit('update-currency-rates', 'coincap.io api request failed')
+          this.emit('update-currency-rates', 'api request failed')
         } else {
           if (data.hasOwnProperty('data') && data.data.hasOwnProperty('rateUsd')) {
             this.currencyRates = data.data
@@ -75,11 +75,11 @@ var CoinCapApi = new Lang.Class({
   },
 
   getCryptoRates: function (callback) {
-    HTTP.getJSON(Globals.GET_CRYPTO_ASSETS_URL, callback)
+    HTTP.getJSON(Globals.GET_CRYPTO_RATES_URL, callback)
   },
 
-  getCurrencyRates: function (callback) {
-    HTTP.getJSON(Globals.GET_CONVERSION_RATES_URL, callback)
+  getFiatRates: function (callback) {
+    HTTP.getJSON(Globals.GET_FIAT_RATES_URL, callback)
   },
 
   isPolling: function() {
@@ -97,4 +97,4 @@ var CoinCapApi = new Lang.Class({
   }
 })
 
-Signals.addSignalMethods(CoinCapApi.prototype)
+Signals.addSignalMethods(CryptoRatesApi.prototype)
