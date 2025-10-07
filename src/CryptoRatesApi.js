@@ -17,7 +17,8 @@ var CryptoRatesApi = new Lang.Class({
 
   cryptoRates: null,
 
-  _init: function () {},
+  _init: function () {
+  },
 
   startPolling: function () {
     let loop = () => {
@@ -82,7 +83,7 @@ var CryptoRatesApi = new Lang.Class({
     HTTP.getJSON(Globals.GET_FIAT_RATES_URL, callback)
   },
 
-  isPolling: function() {
+  isPolling: function () {
     return typeof this._signalTimeout !== 'undefined'
   },
 
