@@ -72,6 +72,7 @@ var IndicatorModel = new Lang.Class({
 
     return {
       name: this._stash.name,
+      visible: this._stash.visible,
       investment,
       totalValue: totalValue,
       currency: currencySymbol,

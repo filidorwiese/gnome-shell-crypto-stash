@@ -145,7 +145,7 @@ var StashConfigView = class {
             this._config.set('visible', obj.active);
         });
 
-        return makeConfigRow('Visible in top panel', switchView);
+        return makeConfigRow('Show value in top panel', switchView);
     }
 
     _confCurrency() {

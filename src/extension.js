@@ -141,7 +141,11 @@ class StashIndicatorView extends PanelMenu.Button {
             return new Intl.NumberFormat('en-US', {minimumFractionDigits, maximumFractionDigits: minimumFractionDigits}).format(value);
         };
 
-        this._displayText(stash.currency + ' ' + formatCurrency(stash.totalValue));
+        if (stash['visible']) {
+          this._displayText(stash.currency + ' ' + formatCurrency(stash.totalValue));
+        } else {
+          this._displayText(stash.name);
+        }
         this._displayStatus(Globals.SYMBOLS.wallet);
         this._popupItemTitle.label.clutter_text.set_markup(`${Globals.SYMBOLS.wallet} <b>${stash.name}</b>`);
 
@@ -154,6 +158,7 @@ class StashIndicatorView extends PanelMenu.Button {
         if (stash.investment > 0) {
             breakdown.push(`<span font_family="monospace">Investment\t\t= ${stash.currency} ${formatCurrency(stash.investment * -1)}</span>`);
         }
+        breakdown.push(`<span font_family="monospace">Current value\t\t= ${stash.currency} ${formatCurrency(stash.totalValue)}</span>`);
 
         this._popupItemBreakdown.label.clutter_text.set_markup(breakdown.join('\n'));
     }
@@ -205,8 +210,7 @@ class IndicatorCollection {
         }
 
         let indicators = stashes
-            .map(JSON.parse)
-            .filter((s) => s.visible);
+            .map(JSON.parse);
 
         if (indicators.length) {
             if (!_api.isPolling()) {
