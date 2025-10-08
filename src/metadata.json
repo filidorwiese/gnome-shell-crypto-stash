@@ -1,4 +1,5 @@
 {
+  "author": "Filidor Wiese",
   "author_url": "https://filidorwiese.nl",
   "description": "Keep an eye on the real time value of your crypto coins collections.\n\nYou can create multiple \"stashes\" (portfolios) of coins and monitor the accumulated value in USD or EUR. Or if you prefer, you can simply track the current value of your favorite coin.",
   "name": "CryptoStash",

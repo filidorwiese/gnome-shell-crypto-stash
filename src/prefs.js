@@ -109,7 +109,7 @@ class MyPrefsWidget extends Gtk.Box {
         this._introText = new Gtk.Label({
             visible: true,
             justify: Gtk.Justification.LEFT,
-            label: `${this._Globals.SYMBOLS.wallet}\n\n${metadata['name']} v${metadata['tag'].toFixed(2)}\n\nAuthor: ${metadata['author_url']}\n\nRepository: ${metadata['url']}`,
+            label: `${this._Globals.SYMBOLS.wallet}\n\n${metadata['name']} v${metadata['tag'].toFixed(2)}\n\nAuthor: ${metadata['author']} - <a href="${metadata['author_url']}">${metadata['author_url']}</a>\n\nRepository: <a href="${metadata['url']}">${metadata['url']}</a>`,
             use_markup: true,
             xalign: 0,
             hexpand: true,
