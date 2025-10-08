@@ -166,13 +166,12 @@ git push origin v1.4
 
 ### 5. Upload to extensions.gnome.org
 
-1. Go to [extensions.gnome.org](https://extensions.gnome.org/)
+1. Go to [extensions.gnome.org](https://extensions.gnome.org/upload/)
 2. Log in with your GNOME account
-3. Navigate to your extension dashboard
-4. Click "Upload Version"
-5. Upload the `.zip` file from `archives/`
-6. Add release notes
-7. Submit for review
+3. Upload the `.zip` file from `archives/`
+4. Click "Upload extension"
+5. Add release notes
+6. Submit for review
 
 ## 🐛 Debugging Tips
 
@@ -214,3 +213,4 @@ Schema location: `src/schemas/org.gnome.shell.extensions.crypto-stash.gschema.xm
 - [GTK 4 Reference](https://gjs-docs.gnome.org/gtk40~4.0/)
 - [Soup HTTP Library](https://gjs-docs.gnome.org/soup30/)
 - [Creating GNOME Extensions](https://www.codeproject.com/Articles/5271677/How-to-Create-A-GNOME-Extension)
+  [Pango markup](https://docs.gtk.org/Pango/pango_markup.html)
