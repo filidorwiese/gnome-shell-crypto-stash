@@ -1,18 +1,15 @@
 {
   "author": "Filidor Wiese",
   "author_url": "https://filidorwiese.nl",
-  "description": "Keep an eye on the real time value of your crypto coins collections.\n\nYou can create multiple \"stashes\" (portfolios) of coins and monitor the accumulated value in USD or EUR. Or if you prefer, you can simply track the current value of your favorite coin.",
+  "description": "Keep an eye on the real time value of your crypto coins collections.\n\nYou can create multiple \"stashes\" (portfolios) of coins and monitor the accumulated value in USD or EUR. Or if you prefer, you can simply track the current value of your favorite coin. \n\nThis extension uses the cryptostash.filidorwiese.nl to fetch cryptocurrency rates.",
   "name": "CryptoStash",
   "settings-schema": "org.gnome.shell.extensions.crypto-stash",
   "shell-version": [
     "43",
-    "44",
-    "45",
-    "46",
-    "47"
+    "44"
   ],
-  "tag": 2.1,
+  "tag": 2.2,
   "url": "https://github.com/filidorwiese/gnome-shell-crypto-stash",
   "uuid": "cryptostash@filidorwiese.nl",
-  "version": 5
+  "version": 6
 }

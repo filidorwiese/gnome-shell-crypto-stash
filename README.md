@@ -68,9 +68,6 @@ gnome-extensions enable cryptostash@filidorwiese.nl
 | 40 and below | ❌ Not supported |
 | 43 | ✅ Fully supported |
 | 44 | ✅ Fully supported |
-| 45 | ✅ Fully supported |
-| 46 | ✅ Fully supported |
-| 47 | ✅ Fully supported |
 
 ## 🐛 Troubleshooting
 
