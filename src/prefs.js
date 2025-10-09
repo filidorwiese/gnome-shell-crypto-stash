@@ -6,6 +6,16 @@ const GLib = imports.gi.GLib;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 
+// Helper function to load legacy modules
+function loadLegacyModule(moduleName) {
+    imports.searchPath.unshift(Me.path);
+    try {
+        return imports[moduleName.replace('.js', '')];
+    } finally {
+        imports.searchPath.shift();
+    }
+}
+
 function init() {
 }
 
@@ -48,22 +58,16 @@ class MyPrefsWidget extends Gtk.Box {
 
         this.availableCoins = ['BTC'];
 
-        // Load modules using legacy imports
-        const loadLegacyModule = (moduleName) => {
-            imports.searchPath.unshift(this._path);
-            try {
-                return imports[moduleName.replace('.js', '')];
-            } finally {
-                imports.searchPath.shift();
-            }
-        };
-
         const HTTP = loadLegacyModule('HTTP.js');
         const Globals = loadLegacyModule('Globals.js');
         this._Globals = Globals;
 
-        HTTP.getJSON(Globals.GET_CRYPTO_RATES_URL, (_, data) => {
-            if (data && data.hasOwnProperty('data') && data.data.length > 0) {
+        HTTP.getJSON(Globals.GET_CRYPTO_RATES_URL, (error, data) => {
+            log('HTTP.getJSON callback fired');
+            if (error) {
+                log(`Error fetching crypto rates: ${error}`);
+            } else if (data && data.hasOwnProperty('data') && data.data.length > 0) {
+                log(`Received ${data.data.length} crypto rates`);
                 this.availableCoins = data.data.map((c) => c.symbol).sort((a, b) => {
                     if (a > b) return 1;
                     if (a < b) return -1;
@@ -71,21 +75,19 @@ class MyPrefsWidget extends Gtk.Box {
                 });
             }
 
-            this.remove(this._loadingText);
-            this.render();
+            try {
+                this.remove(this._loadingText);
+                log('About to call render()');
+                this.render();
+                log('render() completed');
+            } catch (e) {
+                log(`Error in render: ${e}`);
+                logError(e);
+            }
         });
     }
 
     render() {
-        const loadLegacyModule = (moduleName) => {
-            imports.searchPath.unshift(this._path);
-            try {
-                return imports[moduleName.replace('.js', '')];
-            } finally {
-                imports.searchPath.shift();
-            }
-        };
-
         const StashModel = loadLegacyModule('StashModel.js');
         this._store = new StashModel.StashModel();
 
@@ -163,15 +165,6 @@ class MyPrefsWidget extends Gtk.Box {
         if (config === null) {
             return;
         }
-
-        const loadLegacyModule = (moduleName) => {
-            imports.searchPath.unshift(this._path);
-            try {
-                return imports[moduleName.replace('.js', '')];
-            } finally {
-                imports.searchPath.shift();
-            }
-        };
 
         const StashConfigView = loadLegacyModule('StashConfigView.js');
         this._stashConfigView = new StashConfigView.StashConfigView(config, this.availableCoins);

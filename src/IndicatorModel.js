@@ -1,11 +1,8 @@
-const Lang = imports.lang
 const Signals = imports.signals
-const Mainloop = imports.mainloop
+const GLib = imports.gi.GLib
 
-var IndicatorModel = new Lang.Class({
-  Name: 'IndicatorModel',
-
-  _init: function (handler, stash) {
+var IndicatorModel = class {
+  constructor(handler, stash) {
     this._handler = handler
     this._stash = stash
 
@@ -27,12 +24,13 @@ var IndicatorModel = new Lang.Class({
       }
     )
 
-    Mainloop.idle_add(() => {
+    GLib.idle_add(GLib.PRIORITY_DEFAULT_IDLE, () => {
       this._triggerUpdate()
+      return GLib.SOURCE_REMOVE
     })
-  },
+  }
 
-  _triggerUpdate: function (error) {
+  _triggerUpdate(error) {
     if (error) {
       this.emit('update', error, null)
     } else {
@@ -40,9 +38,9 @@ var IndicatorModel = new Lang.Class({
         this.emit('update', null, this._calculateStash())
       }
     }
-  },
+  }
 
-  _calculateStash: function () {
+  _calculateStash() {
     const investment = this._stash.hasOwnProperty('investment') ? this._stash.investment : 0
     const stash = this._stash.assets.map((a) => {
       const amount = parseFloat(String(a.amount).replace(',', '.'))
@@ -78,14 +76,14 @@ var IndicatorModel = new Lang.Class({
       currency: currencySymbol,
       stash,
     }
-  },
+  }
 
-  destroy: function () {
+  destroy() {
     this.disconnectAll()
     this._handler.disconnect(this._signalUpdateStart)
     this._handler.disconnect(this._signalUpdateCryptoRates)
     this._handler.disconnect(this._signalUpdateCurrencyRates)
   }
-})
+}
 
 Signals.addSignalMethods(IndicatorModel.prototype)

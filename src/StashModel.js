@@ -1,56 +1,54 @@
-const Lang = imports.lang
 const Signals = imports.signals
 const Gtk = imports.gi.Gtk
 const GObject = imports.gi.GObject
 
-const Local = imports.misc.extensionUtils.getCurrentExtension()
-const Convenience = Local.imports.convenience
+const ExtensionUtils = imports.misc.extensionUtils
+const Local = ExtensionUtils.getCurrentExtension()
 const Globals = Local.imports.Globals
 
-const ConfigModel = new Lang.Class({
-  Name: 'ConfigModel',
-
-  _init: function (attributes) {
+class ConfigModel {
+  constructor(attributes) {
     this.attributes = attributes
-  },
+  }
 
-  set: function (key, value) {
+  set(key, value) {
     this.attributes[key] = value
     this.emit('update', key, value)
-  },
+  }
 
-  get: function (key) {
+  get(key) {
     return this.attributes[key]
-  },
+  }
 
-  toString: function () {
+  toString() {
     return JSON.stringify(this.attributes)
-  },
+  }
 
-  destroy: function () {
+  destroy() {
     this.disconnectAll()
   }
-})
+}
 
 Signals.addSignalMethods(ConfigModel.prototype)
 
-var StashModel = new GObject.Class({
-  Name: 'CryptoStash.StashModel',
+var StashModel = GObject.registerClass({
   GTypeName: 'StashModel',
-  Extends: Gtk.ListStore,
+  Properties: {},
+}, class StashModel extends Gtk.ListStore {
 
-  Columns: {
-    LABEL: 0,
-    CONFIG: 1
-  },
+  _init(params) {
 
-  _init: function (params) {
+    super._init(params)
 
-    this.parent(params)
+    // Define Columns as instance property
+    this.Columns = {
+      LABEL: 0,
+      CONFIG: 1
+    }
 
     this.set_column_types([GObject.TYPE_STRING, GObject.TYPE_STRING])
 
-    this._settings = Convenience.getSettings()
+    this._settings = ExtensionUtils.getSettings()
 
     this._reloadFromSettings()
 
@@ -70,9 +68,9 @@ var StashModel = new GObject.Class({
     this.connect('row-inserted', mutex(this._onRowInserted.bind(this)))
 
     this.connect('row-deleted', mutex(this._onRowDeleted.bind(this)))
-  },
+  }
 
-  getConfig: function (iter) {
+  getConfig(iter) {
     let json = this.get_value(iter, this.Columns.CONFIG)
 
     if (!json) {
@@ -90,17 +88,17 @@ var StashModel = new GObject.Class({
     })
 
     return config
-  },
+  }
 
-  _getLabel: function (config) {
+  _getLabel(config) {
     return config.name
-  },
+  }
 
-  _getDefaults: function () {
+  _getDefaults() {
     return Globals.DEFAULT_STASH
-  },
+  }
 
-  _reloadFromSettings: function () {
+  _reloadFromSettings() {
     this.clear()
 
     let configs = this._settings.get_strv(Globals.STORAGE_KEY_STASHES)
@@ -123,9 +121,9 @@ var StashModel = new GObject.Class({
         logError('error loading stash config: ' + e)
       }
     }
-  },
+  }
 
-  _writeSettings: function () {
+  _writeSettings() {
     let [res, iter] = this.get_iter_first()
     let configs = []
 
@@ -135,9 +133,9 @@ var StashModel = new GObject.Class({
     }
 
     this._settings.set_strv(Globals.STORAGE_KEY_STASHES, configs)
-  },
+  }
 
-  _onRowChanged: function (self, path, iter) {
+  _onRowChanged(self, path, iter) {
     let config = this.get_value(iter, this.Columns.CONFIG)
 
     this.set(
@@ -147,9 +145,9 @@ var StashModel = new GObject.Class({
     )
 
     this._writeSettings()
-  },
+  }
 
-  _onRowInserted: function (self, path, iter) {
+  _onRowInserted(self, path, iter) {
     let defaults = this._getDefaults()
 
     this.set(
@@ -159,13 +157,13 @@ var StashModel = new GObject.Class({
     )
 
     this._writeSettings()
-  },
+  }
 
-  _onRowDeleted: function (self, path, iter) {
+  _onRowDeleted(self, path, iter) {
     this._writeSettings()
-  },
+  }
 
-  destroy: function () {
+  destroy() {
     this._settings.disconnect(this._settingsChangedId)
   }
 })

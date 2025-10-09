@@ -1,6 +1,5 @@
-const Lang = imports.lang
 const Signals = imports.signals
-const Mainloop = imports.mainloop
+const GLib = imports.gi.GLib
 
 const Local = imports.misc.extensionUtils.getCurrentExtension()
 const HTTP = Local.imports.HTTP
@@ -8,19 +7,14 @@ const Globals = Local.imports.Globals
 
 const defaultInterval = 3600
 
-var CryptoRatesApi = new Lang.Class({
-  Name: 'CryptoRatesApi',
+var CryptoRatesApi = class {
+  constructor() {
+    this.interval = defaultInterval
+    this.currencyRates = null
+    this.cryptoRates = null
+  }
 
-  interval: defaultInterval,
-
-  currencyRates: null,
-
-  cryptoRates: null,
-
-  _init: function () {
-  },
-
-  startPolling: function () {
+  startPolling() {
     let loop = () => {
       this.emit('update-start')
 
@@ -66,36 +60,41 @@ var CryptoRatesApi = new Lang.Class({
         }
       })
 
-      this._signalTimeout = Mainloop.timeout_add_seconds(
+      this._signalTimeout = GLib.timeout_add_seconds(
+        GLib.PRIORITY_DEFAULT,
         this.interval,
         loop
       )
     }
 
-    Mainloop.idle_add(loop)
-  },
-
-  getCryptoRates: function (callback) {
-    HTTP.getJSON(Globals.GET_CRYPTO_RATES_URL, callback)
-  },
-
-  getFiatRates: function (callback) {
-    HTTP.getJSON(Globals.GET_FIAT_RATES_URL, callback)
-  },
-
-  isPolling: function () {
-    return typeof this._signalTimeout !== 'undefined'
-  },
-
-  stopPolling: function () {
-    if (this._signalTimeout) {
-      Mainloop.source_remove(this._signalTimeout)
-    }
-  },
-
-  destroy: function () {
-    this.stopPolling()
+    GLib.idle_add(GLib.PRIORITY_DEFAULT_IDLE, () => {
+      loop()
+      return GLib.SOURCE_REMOVE
+    })
   }
-})
+
+  getCryptoRates(callback) {
+    HTTP.getJSON(Globals.GET_CRYPTO_RATES_URL, callback)
+  }
+
+  getFiatRates(callback) {
+    HTTP.getJSON(Globals.GET_FIAT_RATES_URL, callback)
+  }
+
+  isPolling() {
+    return typeof this._signalTimeout !== 'undefined'
+  }
+
+  stopPolling() {
+    if (this._signalTimeout) {
+      GLib.Source.remove(this._signalTimeout)
+    }
+  }
+
+  destroy() {
+    this.stopPolling()
+    HTTP.destroy()
+  }
+}
 
 Signals.addSignalMethods(CryptoRatesApi.prototype)

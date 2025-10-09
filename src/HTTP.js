@@ -26,13 +26,32 @@ var isErrTooManyRequests = (err) =>
   err.soupMessage.status_code &&
   Number(err.soupMessage.status_code) === STATUS_TOO_MANY_REQUESTS
 
-const _userAgent = `${Local.metadata['name']}/${String(Local.metadata.tag)}/Gnome ${Config.PACKAGE_VERSION} (${Local.metadata['url']})`
-const _httpSession = new Soup.Session()
-_httpSession['user-agent'] = _userAgent
+// HTTP session management - not initialized at global scope
+let _httpSession = null
+let _userAgent = null
 
-// ProxyResolverDefault is deprecated, proxy resolution is automatic in modern libsoup
+var init = () => {
+  if (!_httpSession) {
+    _userAgent = `${Local.metadata['name']}/${String(Local.metadata.tag)}/Gnome ${Config.PACKAGE_VERSION} (${Local.metadata['url']})`
+    _httpSession = new Soup.Session()
+    _httpSession['user-agent'] = _userAgent
+  }
+}
+
+var destroy = () => {
+  if (_httpSession) {
+    _httpSession.abort()
+    _httpSession = null
+    _userAgent = null
+  }
+}
 
 var getJSON = (url, callback) => {
+  // Ensure session is initialized
+  if (!_httpSession) {
+    init()
+  }
+
   let message = Soup.Message.new('GET', url)
   let headers = message.request_headers
   headers.append('X-Client', _userAgent)

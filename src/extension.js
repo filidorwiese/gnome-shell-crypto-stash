@@ -36,30 +36,6 @@ function disable() {
   }
 }
 
-function getSettings(schema = null) {
-  schema = schema || Me.metadata['settings-schema'];
-
-  const GioSSS = Gio.SettingsSchemaSource;
-
-  let schemaDir = Gio.File.new_for_path(GLib.build_filenamev([Me.path, 'schemas']));
-  let schemaSource;
-
-  if (schemaDir.query_exists(null)) {
-    schemaSource = GioSSS.new_from_directory(schemaDir.get_path(),
-      GioSSS.get_default(),
-      false);
-  } else {
-    schemaSource = GioSSS.get_default();
-  }
-
-  let schemaObj = schemaSource.lookup(schema, true);
-  if (!schemaObj) {
-    throw new Error(`Schema ${schema} could not be found for extension ${Me.metadata.uuid}`);
-  }
-
-  return new Gio.Settings({settings_schema: schemaObj});
-}
-
 const StashIndicatorView = GObject.registerClass(
   class StashIndicatorView extends PanelMenu.Button {
     _init(stash) {
@@ -193,7 +169,7 @@ class IndicatorCollection {
   constructor() {
     this._indicators = [];
 
-    this._settings = getSettings();
+    this._settings = ExtensionUtils.getSettings();
 
     this._settingsChangedId = this._settings.connect(
       'changed::' + Globals.STORAGE_KEY_STASHES,
