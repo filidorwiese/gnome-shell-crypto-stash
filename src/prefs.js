@@ -6,16 +6,6 @@ const GLib = imports.gi.GLib;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 
-// Helper function to load legacy modules
-function loadLegacyModule(moduleName) {
-    imports.searchPath.unshift(Me.path);
-    try {
-        return imports[moduleName.replace('.js', '')];
-    } finally {
-        imports.searchPath.shift();
-    }
-}
-
 function init() {
 }
 
@@ -58,8 +48,8 @@ class MyPrefsWidget extends Gtk.Box {
 
         this.availableCoins = ['BTC'];
 
-        const HTTP = loadLegacyModule('HTTP.js');
-        const Globals = loadLegacyModule('Globals.js');
+        const HTTP = Me.imports.HTTP;
+        const Globals = Me.imports.Globals;
         this._Globals = Globals;
 
         HTTP.getJSON(Globals.GET_CRYPTO_RATES_URL, (error, data) => {
@@ -88,7 +78,7 @@ class MyPrefsWidget extends Gtk.Box {
     }
 
     render() {
-        const StashModel = loadLegacyModule('StashModel.js');
+        const StashModel = Me.imports.StashModel;
         this._store = new StashModel.StashModel();
 
         const sidebar = new Gtk.Box({
@@ -166,7 +156,7 @@ class MyPrefsWidget extends Gtk.Box {
             return;
         }
 
-        const StashConfigView = loadLegacyModule('StashConfigView.js');
+        const StashConfigView = Me.imports.StashConfigView;
         this._stashConfigView = new StashConfigView.StashConfigView(config, this.availableCoins);
         this._configLayout.append(this._stashConfigView.widget);
     }
