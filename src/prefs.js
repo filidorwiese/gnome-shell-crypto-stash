@@ -5,6 +5,8 @@ const GLib = imports.gi.GLib;
 
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
+const HTTP = Me.imports.HTTP;
+const Globals = Me.imports.Globals;
 
 function init() {
 }
@@ -47,10 +49,6 @@ class MyPrefsWidget extends Gtk.Box {
         this.append(this._loadingText);
 
         this.availableCoins = ['BTC'];
-
-        const HTTP = Me.imports.HTTP;
-        const Globals = Me.imports.Globals;
-        this._Globals = Globals;
 
         HTTP.getJSON(Globals.GET_CRYPTO_RATES_URL, (error, data) => {
             log('HTTP.getJSON callback fired');
@@ -101,7 +99,7 @@ class MyPrefsWidget extends Gtk.Box {
         this._introText = new Gtk.Label({
             visible: true,
             justify: Gtk.Justification.LEFT,
-            label: `${this._Globals.SYMBOLS.wallet}\n\n${metadata['name']} v${metadata['tag'].toFixed(2)}\n\nAuthor: ${metadata['author']} - <a href="${metadata['author_url']}">${metadata['author_url']}</a>\n\nRepository: <a href="${metadata['url']}">${metadata['url']}</a>`,
+            label: `${Globals.SYMBOLS.wallet}\n\n${metadata['name']} v${metadata['tag'].toFixed(2)}\n\nAuthor: ${metadata['author']} - <a href="${metadata['author_url']}">${metadata['author_url']}</a>\n\nRepository: <a href="${metadata['url']}">${metadata['url']}</a>`,
             use_markup: true,
             xalign: 0,
             hexpand: true,
