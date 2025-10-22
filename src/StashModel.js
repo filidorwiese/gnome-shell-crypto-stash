@@ -1,169 +1,174 @@
-const Signals = imports.signals
-const Gtk = imports.gi.Gtk
-const GObject = imports.gi.GObject
+import Gtk from 'gi://Gtk';
+import GObject from 'gi://GObject';
 
-const ExtensionUtils = imports.misc.extensionUtils
-const Local = ExtensionUtils.getCurrentExtension()
-const Globals = Local.imports.Globals
+import * as Globals from './Globals.js';
 
-class ConfigModel {
+export const ConfigModel = GObject.registerClass({
+  GTypeName: 'ConfigModel',
+  Signals: {
+    'update': {
+      param_types: [GObject.TYPE_STRING, GObject.TYPE_STRING]
+    },
+  },
+}, class ConfigModel extends GObject.Object {
   constructor(attributes) {
-    this.attributes = attributes
+    super();
+    this.attributes = attributes;
   }
 
   set(key, value) {
-    this.attributes[key] = value
-    this.emit('update', key, value)
+    this.attributes[key] = value;
+    this.emit('update', key, JSON.stringify(value));
   }
 
   get(key) {
-    return this.attributes[key]
+    return this.attributes[key];
   }
 
   toString() {
-    return JSON.stringify(this.attributes)
+    return JSON.stringify(this.attributes);
   }
 
   destroy() {
-    this.disconnectAll()
+    // No signals to disconnect in GObject-based implementation
   }
-}
+});
 
-Signals.addSignalMethods(ConfigModel.prototype)
-
-var StashModel = GObject.registerClass({
+export const StashModel = GObject.registerClass({
   GTypeName: 'StashModel',
   Properties: {},
 }, class StashModel extends Gtk.ListStore {
 
-  _init(params) {
+  _init(settings) {
 
-    super._init(params)
+    super._init();
 
     // Define Columns as instance property
     this.Columns = {
       LABEL: 0,
       CONFIG: 1
-    }
+    };
 
-    this.set_column_types([GObject.TYPE_STRING, GObject.TYPE_STRING])
+    this.set_column_types([GObject.TYPE_STRING, GObject.TYPE_STRING]);
 
-    this._settings = ExtensionUtils.getSettings()
+    this._settings = settings;
 
-    this._reloadFromSettings()
+    this._reloadFromSettings();
 
-    var flag
+    var flag;
 
     let mutex = (func) =>
       function () {
         if (!flag) {
-          flag = true
-          func.apply(null, arguments)
-          flag = false
+          flag = true;
+          func.apply(null, arguments);
+          flag = false;
         }
-      }
+      };
 
-    this.connect('row-changed', mutex(this._onRowChanged.bind(this)))
+    this.connect('row-changed', mutex(this._onRowChanged.bind(this)));
 
-    this.connect('row-inserted', mutex(this._onRowInserted.bind(this)))
+    this.connect('row-inserted', mutex(this._onRowInserted.bind(this)));
 
-    this.connect('row-deleted', mutex(this._onRowDeleted.bind(this)))
+    this.connect('row-deleted', mutex(this._onRowDeleted.bind(this)));
   }
 
   getConfig(iter) {
-    let json = this.get_value(iter, this.Columns.CONFIG)
+    let json = this.get_value(iter, this.Columns.CONFIG);
 
     if (!json) {
-      throw new Error('getConfig() failed for iter=' + iter)
+      throw new Error('getConfig() failed for iter=' + iter);
     }
 
-    let config = new ConfigModel(JSON.parse(json))
+    let config = new ConfigModel(JSON.parse(json));
 
     config.connect('update', () => {
       this.set(
         iter,
         [this.Columns.CONFIG],
         [config.toString()]
-      )
-    })
+      );
+    });
 
-    return config
+    return config;
   }
 
   _getLabel(config) {
-    return config.name
+    return config.name;
   }
 
   _getDefaults() {
-    return Globals.DEFAULT_STASH
+    return Globals.DEFAULT_STASH;
   }
 
   _reloadFromSettings() {
-    this.clear()
+    this.clear();
 
-    let configs = this._settings.get_strv(Globals.STORAGE_KEY_STASHES)
+    let configs = this._settings.get_strv(Globals.STORAGE_KEY_STASHES);
 
     // Use a default stash if none have been created yet
     if (!configs || configs.length < 1) {
-      configs = [JSON.stringify(Globals.DEFAULT_STASH)]
+      configs = [JSON.stringify(Globals.DEFAULT_STASH)];
     }
 
     for (let key in configs) {
-      let json = configs[key]
+      let json = configs[key];
       try {
-        let label = this._getLabel(JSON.parse(json))
+        let label = this._getLabel(JSON.parse(json));
         this.set(
           this.append(),
           [this.Columns.LABEL, this.Columns.CONFIG],
           [label, json]
-        )
+        );
       } catch (e) {
-        logError('error loading stash config: ' + e)
+        logError('error loading stash config: ' + e);
       }
     }
   }
 
   _writeSettings() {
-    let [res, iter] = this.get_iter_first()
-    let configs = []
+    let [res, iter] = this.get_iter_first();
+    let configs = [];
 
     while (res) {
-      configs.push(this.get_value(iter, this.Columns.CONFIG))
-      res = this.iter_next(iter)
+      configs.push(this.get_value(iter, this.Columns.CONFIG));
+      res = this.iter_next(iter);
     }
 
-    this._settings.set_strv(Globals.STORAGE_KEY_STASHES, configs)
+    this._settings.set_strv(Globals.STORAGE_KEY_STASHES, configs);
   }
 
   _onRowChanged(self, path, iter) {
-    let config = this.get_value(iter, this.Columns.CONFIG)
+    let config = this.get_value(iter, this.Columns.CONFIG);
 
     this.set(
       iter,
       [this.Columns.LABEL, this.Columns.CONFIG],
       [this._getLabel(JSON.parse(config)), config]
-    )
+    );
 
-    this._writeSettings()
+    this._writeSettings();
   }
 
   _onRowInserted(self, path, iter) {
-    let defaults = this._getDefaults()
+    let defaults = this._getDefaults();
 
     this.set(
       iter,
       [this.Columns.LABEL, this.Columns.CONFIG],
       [this._getLabel(defaults), JSON.stringify(defaults)]
-    )
+    );
 
-    this._writeSettings()
+    this._writeSettings();
   }
 
   _onRowDeleted(self, path, iter) {
-    this._writeSettings()
+    this._writeSettings();
   }
 
   destroy() {
-    this._settings.disconnect(this._settingsChangedId)
+    if (this._settingsChangedId && this._settings) {
+      this._settings.disconnect(this._settingsChangedId);
+    }
   }
-})
+});

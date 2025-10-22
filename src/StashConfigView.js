@@ -1,9 +1,7 @@
-const Gtk = imports.gi.Gtk;
-const GObject = imports.gi.GObject;
-const Signals = imports.signals;
+import Gtk from 'gi://Gtk';
+import GObject from 'gi://GObject';
 
-const Local = imports.misc.extensionUtils.getCurrentExtension();
-const Globals = Local.imports.Globals;
+import * as Globals from './Globals.js';
 
 const makeConfigRow = (description, widget) => {
   let box = new Gtk.Box({
@@ -26,8 +24,14 @@ const makeConfigRow = (description, widget) => {
   return box;
 };
 
-const ComboBoxView = class {
+export const ComboBoxView = GObject.registerClass({
+  GTypeName: 'ComboBoxView',
+  Signals: {
+    'changed': {param_types: [GObject.TYPE_STRING]},
+  },
+}, class ComboBoxView extends GObject.Object {
   constructor(options) {
+    super();
     this.Columns = {LABEL: 0, VALUE: 1};
 
     let model = new Gtk.ListStore();
@@ -67,10 +71,9 @@ const ComboBoxView = class {
       }
     });
   }
-};
-Signals.addSignalMethods(ComboBoxView.prototype);
+});
 
-var StashConfigView = class {
+export class StashConfigView {
   constructor(config, availableCoins) {
     this._config = config;
     this._availableCoins = availableCoins;
@@ -416,8 +419,6 @@ var StashConfigView = class {
   }
 
   destroy() {
-    this.disconnectAll();
+    // Cleanup if needed
   }
-};
-
-Signals.addSignalMethods(StashConfigView.prototype);
+}

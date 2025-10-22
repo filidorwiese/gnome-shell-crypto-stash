@@ -1,47 +1,27 @@
-const St = imports.gi.St;
-const Clutter = imports.gi.Clutter;
-const GObject = imports.gi.GObject;
-const Gio = imports.gi.Gio;
-const GLib = imports.gi.GLib;
-const Main = imports.ui.main;
-const PanelMenu = imports.ui.panelMenu;
-const PopupMenu = imports.ui.popupMenu;
+import St from 'gi://St';
+import Clutter from 'gi://Clutter';
+import GObject from 'gi://GObject';
+import Gio from 'gi://Gio';
+import GLib from 'gi://GLib';
+import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
+import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
+import * as Config from 'resource:///org/gnome/shell/misc/config.js';
 
-const ExtensionUtils = imports.misc.extensionUtils;
-const Me = ExtensionUtils.getCurrentExtension();
-const CryptoRatesApi = Me.imports.CryptoRatesApi;
-const IndicatorModel = Me.imports.IndicatorModel;
-const Globals = Me.imports.Globals;
+import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
 
-let _indicatorCollection = null;
-let _api = null;
-
-function enable() {
-  try {
-    _api = new CryptoRatesApi.CryptoRatesApi();
-    _indicatorCollection = new IndicatorCollection();
-  } catch (e) {
-    console.error('Extension enable error:', e);
-  }
-}
-
-function disable() {
-  if (_indicatorCollection) {
-    _indicatorCollection.destroy();
-    _indicatorCollection = null;
-  }
-  if (_api) {
-    _api.destroy();
-    _api = null;
-  }
-}
+import {CryptoRatesApi} from './CryptoRatesApi.js';
+import {IndicatorModel} from './IndicatorModel.js';
+import * as Globals from './Globals.js';
+import * as HTTP from './HTTP.js';
 
 const StashIndicatorView = GObject.registerClass(
   class StashIndicatorView extends PanelMenu.Button {
-    _init(stash) {
+    _init(stash, api, openPrefsFunc) {
       super._init(0);
       this._stash = stash;
-      this._api = _api;
+      this._api = api;
+      this._openPrefs = openPrefsFunc;
 
       this._initLayout();
       this._initBehavior();
@@ -85,21 +65,22 @@ const StashIndicatorView = GObject.registerClass(
       this._popupItemSettings = new PopupMenu.PopupMenuItem('⚙ Settings...');
       this.menu.addMenuItem(this._popupItemSettings);
       this._popupItemSettings.connect('activate', () => {
-        ExtensionUtils.openPrefs();
+        this._openPrefs();
       });
     }
 
     _initBehavior() {
-      this._model = new IndicatorModel.IndicatorModel(this._api, this._stash);
+      this._model = new IndicatorModel(this._api, this._stash);
 
       this._model.connect('update-start', () => {
         this._displayStatus(Globals.SYMBOLS.refresh);
       });
 
-      this._model.connect('update', (obj, err, stash) => {
+      this._model.connect('update', (obj, err, stashJson) => {
         if (err) {
           this._showError(err);
         } else {
+          const stash = JSON.parse(stashJson);
           this._showData(stash);
         }
       });
@@ -166,10 +147,11 @@ const StashIndicatorView = GObject.registerClass(
   });
 
 class IndicatorCollection {
-  constructor() {
+  constructor(settings, api, openPrefsFunc) {
     this._indicators = [];
-
-    this._settings = ExtensionUtils.getSettings();
+    this._settings = settings;
+    this._api = api;
+    this._openPrefs = openPrefsFunc;
 
     this._settingsChangedId = this._settings.connect(
       'changed::' + Globals.STORAGE_KEY_STASHES,
@@ -192,18 +174,18 @@ class IndicatorCollection {
       .map(JSON.parse);
 
     if (indicators.length) {
-      if (!_api.isPolling()) {
-        _api.startPolling();
+      if (!this._api.isPolling()) {
+        this._api.startPolling();
       }
       indicators.forEach((s) => {
         try {
-          this.add(new StashIndicatorView(s));
+          this.add(new StashIndicatorView(s, this._api, this._openPrefs));
         } catch (e) {
           console.error('error creating indicator: ' + e);
         }
       });
     } else {
-      _api.stopPolling();
+      this._api.stopPolling();
     }
   }
 
@@ -223,5 +205,35 @@ class IndicatorCollection {
     if (this._settingsChangedId && this._settings) {
       this._settings.disconnect(this._settingsChangedId);
     }
+  }
+}
+
+export default class CryptoStashExtension extends Extension {
+  enable() {
+    try {
+      HTTP.init(this.metadata, Config.PACKAGE_VERSION);
+      this._api = new CryptoRatesApi(this.metadata);
+      this._settings = this.getSettings();
+      this._indicatorCollection = new IndicatorCollection(
+        this._settings,
+        this._api,
+        () => this.openPreferences()
+      );
+    } catch (e) {
+      console.error('Extension enable error:', e);
+    }
+  }
+
+  disable() {
+    if (this._indicatorCollection) {
+      this._indicatorCollection.destroy();
+      this._indicatorCollection = null;
+    }
+    if (this._api) {
+      this._api.destroy();
+      this._api = null;
+    }
+    HTTP.destroy();
+    this._settings = null;
   }
 }

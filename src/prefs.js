@@ -1,30 +1,20 @@
-const Gtk = imports.gi.Gtk;
-const GObject = imports.gi.GObject;
-const Gio = imports.gi.Gio;
-const GLib = imports.gi.GLib;
+import Gtk from 'gi://Gtk';
+import GObject from 'gi://GObject';
+import Gio from 'gi://Gio';
+import GLib from 'gi://GLib';
+import Adw from 'gi://Adw';
+import * as Config from 'resource:///org/gnome/shell/misc/config.js';
 
-const ExtensionUtils = imports.misc.extensionUtils;
-const Me = ExtensionUtils.getCurrentExtension();
-const HTTP = Me.imports.HTTP;
-const Globals = Me.imports.Globals;
+import {ExtensionPreferences} from 'resource:///org/gnome/shell/extensions/prefs.js';
 
-function init() {
-}
-
-function buildPrefsWidget() {
-    const widget = new MyPrefsWidget();
-
-    // GTK4 doesn't need show_all anymore, but for GTK3 compatibility
-    if (widget.show_all) {
-        widget.show_all();
-    }
-
-    return widget;
-}
+import * as HTTP from './HTTP.js';
+import * as Globals from './Globals.js';
+import {StashModel} from './StashModel.js';
+import {StashConfigView} from './StashConfigView.js';
 
 const MyPrefsWidget = GObject.registerClass(
 class MyPrefsWidget extends Gtk.Box {
-    _init() {
+    _init(settings, metadata, path) {
         super._init({
             orientation: Gtk.Orientation.HORIZONTAL,
             spacing: 12,
@@ -32,8 +22,9 @@ class MyPrefsWidget extends Gtk.Box {
             vexpand: true
         });
 
-        this._settings = ExtensionUtils.getSettings('org.gnome.shell.extensions.crypto-stash');
-        this._path = Me.path;
+        this._settings = settings;
+        this._metadata = metadata;
+        this._path = path;
 
         this.loadCryptoRates();
     }
@@ -76,8 +67,7 @@ class MyPrefsWidget extends Gtk.Box {
     }
 
     render() {
-        const StashModel = Me.imports.StashModel;
-        this._store = new StashModel.StashModel();
+        this._store = new StashModel(this._settings);
 
         const sidebar = new Gtk.Box({
             orientation: Gtk.Orientation.VERTICAL,
@@ -94,12 +84,10 @@ class MyPrefsWidget extends Gtk.Box {
         });
         this.append(this._configLayout);
 
-        const metadata = Me.metadata;
-
         this._introText = new Gtk.Label({
             visible: true,
             justify: Gtk.Justification.LEFT,
-            label: `${Globals.SYMBOLS.wallet}\n\n${metadata['name']} v${metadata['tag'].toFixed(2)}\n\nAuthor: ${metadata['author']} - <a href="${metadata['author_url']}">${metadata['author_url']}</a>\n\nRepository: <a href="${metadata['url']}">${metadata['url']}</a>`,
+            label: `${Globals.SYMBOLS.wallet}\n\n${this._metadata['name']} v${this._metadata['tag'].toFixed(2)}\n\nAuthor: ${this._metadata['author']} - <a href="${this._metadata['author_url']}">${this._metadata['author_url']}</a>\n\nRepository: <a href="${this._metadata['url']}">${this._metadata['url']}</a>`,
             use_markup: true,
             xalign: 0,
             hexpand: true,
@@ -154,8 +142,7 @@ class MyPrefsWidget extends Gtk.Box {
             return;
         }
 
-        const StashConfigView = Me.imports.StashConfigView;
-        this._stashConfigView = new StashConfigView.StashConfigView(config, this.availableCoins);
+        this._stashConfigView = new StashConfigView(config, this.availableCoins);
         this._configLayout.append(this._stashConfigView.widget);
     }
 
@@ -217,3 +204,16 @@ class MyPrefsWidget extends Gtk.Box {
         this._updateToolbar();
     }
 });
+
+export default class CryptoStashPreferences extends ExtensionPreferences {
+    fillPreferencesWindow(window) {
+        HTTP.init(this.metadata, Config.PACKAGE_VERSION);
+
+        const widget = new MyPrefsWidget(this.getSettings(), this.metadata, this.path);
+        const page = new Adw.PreferencesPage();
+        const group = new Adw.PreferencesGroup();
+        group.add(widget);
+        page.add(group);
+        window.add(page);
+    }
+}

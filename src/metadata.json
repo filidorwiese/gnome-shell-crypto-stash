@@ -5,8 +5,10 @@
   "name": "CryptoStash",
   "settings-schema": "org.gnome.shell.extensions.crypto-stash",
   "shell-version": [
-    "43",
-    "44"
+    "45",
+    "46",
+    "47",
+    "48"
   ],
   "tag": 2.4,
   "url": "https://github.com/filidorwiese/gnome-shell-crypto-stash",

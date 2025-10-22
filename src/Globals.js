@@ -1,10 +1,10 @@
-var GET_CRYPTO_RATES_URL = 'https://cryptostash.filidorwiese.nl/coins.json'
+export const GET_CRYPTO_RATES_URL = 'https://cryptostash.filidorwiese.nl/coins.json';
 
-var GET_FIAT_RATES_URL = 'https://cryptostash.filidorwiese.nl/rates.json'
+export const GET_FIAT_RATES_URL = 'https://cryptostash.filidorwiese.nl/rates.json';
 
-var STORAGE_KEY_STASHES = 'stashes'
+export const STORAGE_KEY_STASHES = 'stashes';
 
-var DEFAULT_STASH = {
+export const DEFAULT_STASH = {
   name: 'New Stash',
   visible: true,
   currency: 'USD',
@@ -12,12 +12,12 @@ var DEFAULT_STASH = {
   assets: [
     {symbol: 'BTC', amount: 1},
   ]
-}
+};
 
-var AVAILABLE_CURRENCIES = ['USD', 'EUR']
+export const AVAILABLE_CURRENCIES = ['USD', 'EUR'];
 
-var SYMBOLS = {
+export const SYMBOLS = {
   error: '\u26A0',
   refresh: '\u27f3',
   wallet: '👛'
-}
+};
