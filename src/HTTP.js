@@ -29,7 +29,7 @@ export const isErrTooManyRequests = (err) =>
 let _httpSession = null;
 let _userAgent = null;
 
-export const init = (metadata, packageVersion) => {
+export const init = (metadata, packageVersion = 'Unknown') => {
   if (!_httpSession) {
     _userAgent = `${metadata['name']}/${String(metadata.tag)}/Gnome ${packageVersion} (${metadata['url']})`;
     _httpSession = new Soup.Session();

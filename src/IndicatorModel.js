@@ -16,21 +16,18 @@ export const IndicatorModel = GObject.registerClass({
     this._stash = stash;
 
     this._signalUpdateStart = handler.connect(
-      'update-start', () => {
-        this.emit('update-start');
-      }
+      'update-start',
+      () => this.emit('update-start')
     );
 
     this._signalUpdateCryptoRates = handler.connect(
-      'update-crypto-rates', (obj, error) => {
-        this._triggerUpdate(error);
-      }
+      'update-crypto-rates',
+      (_obj, error) => this._triggerUpdate(error)
     );
 
     this._signalUpdateCurrencyRates = handler.connect(
-      'update-currency-rates', (obj, error) => {
-        this._triggerUpdate(error);
-      }
+      'update-currency-rates',
+      (_obj, error) => this._triggerUpdate(error)
     );
 
     GLib.idle_add(GLib.PRIORITY_DEFAULT_IDLE, () => {
@@ -50,7 +47,7 @@ export const IndicatorModel = GObject.registerClass({
   }
 
   _calculateStash() {
-    const investment = this._stash.hasOwnProperty('investment') ? this._stash.investment : 0;
+    const investment = this._stash.investment ?? 0;
     const stash = this._stash.assets.map((a) => {
       const amount = parseFloat(String(a.amount).replace(',', '.'));
       const assetRate = this._handler.cryptoRates.filter((c) => c.symbol === a.symbol);

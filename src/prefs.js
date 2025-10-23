@@ -1,11 +1,8 @@
 import Gtk from 'gi://Gtk';
 import GObject from 'gi://GObject';
-import Gio from 'gi://Gio';
-import GLib from 'gi://GLib';
 import Adw from 'gi://Adw';
-import * as Config from 'resource:///org/gnome/shell/misc/config.js';
 
-import {ExtensionPreferences} from 'resource:///org/gnome/shell/extensions/prefs.js';
+import {ExtensionPreferences} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
 import * as HTTP from './HTTP.js';
 import * as Globals from './Globals.js';
@@ -14,7 +11,7 @@ import {StashConfigView} from './StashConfigView.js';
 
 const MyPrefsWidget = GObject.registerClass(
 class MyPrefsWidget extends Gtk.Box {
-    _init(settings, metadata, path) {
+    _init(settings, metadata) {
         super._init({
             orientation: Gtk.Orientation.HORIZONTAL,
             spacing: 12,
@@ -24,7 +21,6 @@ class MyPrefsWidget extends Gtk.Box {
 
         this._settings = settings;
         this._metadata = metadata;
-        this._path = path;
 
         this.loadCryptoRates();
     }
@@ -45,13 +41,9 @@ class MyPrefsWidget extends Gtk.Box {
             log('HTTP.getJSON callback fired');
             if (error) {
                 log(`Error fetching crypto rates: ${error}`);
-            } else if (data && data.hasOwnProperty('data') && data.data.length > 0) {
+            } else if (data?.data?.length > 0) {
                 log(`Received ${data.data.length} crypto rates`);
-                this.availableCoins = data.data.map((c) => c.symbol).sort((a, b) => {
-                    if (a > b) return 1;
-                    if (a < b) return -1;
-                    return 0;
-                });
+                this.availableCoins = data.data.map((c) => c.symbol).sort();
             }
 
             try {
@@ -87,7 +79,7 @@ class MyPrefsWidget extends Gtk.Box {
         this._introText = new Gtk.Label({
             visible: true,
             justify: Gtk.Justification.LEFT,
-            label: `${Globals.SYMBOLS.wallet}\n\n${this._metadata['name']} v${this._metadata['tag'].toFixed(2)}\n\nAuthor: ${this._metadata['author']} - <a href="${this._metadata['author_url']}">${this._metadata['author_url']}</a>\n\nRepository: <a href="${this._metadata['url']}">${this._metadata['url']}</a>`,
+            label: `${Globals.SYMBOLS.wallet} ${this._metadata['name']} v${this._metadata['tag'].toFixed(2)}\n\nAuthor: ${this._metadata['author']} - <a href="${this._metadata['author_url']}">${this._metadata['author_url']}</a>\n\nRepository: <a href="${this._metadata['url']}">${this._metadata['url']}</a>`,
             use_markup: true,
             xalign: 0,
             hexpand: true,
@@ -152,12 +144,7 @@ class MyPrefsWidget extends Gtk.Box {
             spacing: 0
         });
 
-        // add_css_class is GTK4, use get_style_context for GTK3
-        if (toolbar.add_css_class) {
-            toolbar.add_css_class('toolbar');
-        } else {
-            toolbar.get_style_context().add_class('toolbar');
-        }
+        toolbar.add_css_class('toolbar');
 
         let newButton = new Gtk.Button({
             icon_name: 'list-add-symbolic',
@@ -207,9 +194,9 @@ class MyPrefsWidget extends Gtk.Box {
 
 export default class CryptoStashPreferences extends ExtensionPreferences {
     fillPreferencesWindow(window) {
-        HTTP.init(this.metadata, Config.PACKAGE_VERSION);
+        HTTP.init(this.metadata);
 
-        const widget = new MyPrefsWidget(this.getSettings(), this.metadata, this.path);
+        const widget = new MyPrefsWidget(this.getSettings(), this.metadata);
         const page = new Adw.PreferencesPage();
         const group = new Adw.PreferencesGroup();
         group.add(widget);

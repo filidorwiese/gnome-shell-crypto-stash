@@ -222,10 +222,8 @@ export class StashConfigView {
       'max-length': 16,
       text: '1',
       hexpand: true,
+      input_purpose: Gtk.InputPurpose.DIGITS
     });
-    if (this.addAssetAmount.set_input_purpose) {
-      this.addAssetAmount.set_input_purpose(Gtk.InputPurpose.DIGITS);
-    }
 
     this.changeAssetButton = new Gtk.Button({
       label: 'Update asset',

@@ -65,9 +65,13 @@ gnome-extensions enable cryptostash@filidorwiese.nl
 
 | GNOME Shell Version | Status |
 |---------------------|---------|
-| 40 and below | ❌ Not supported |
-| 43 | ✅ Fully supported |
-| 44 | ✅ Fully supported |
+| 40 and below        | ❌ Not supported |
+| 43                  | ❌ Not supported |
+| 44                  | ❌ Not supported |
+| 45                  | ✅ Fully supported |
+| 46                  | ✅ Fully supported |
+| 47                  | ✅ Fully supported |
+| 48                  | ✅ Fully supported |
 
 ## 🐛 Troubleshooting
 

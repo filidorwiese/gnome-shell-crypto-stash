@@ -37,7 +37,7 @@ export const CryptoRatesApi = GObject.registerClass({
           }
           this.emit('update-crypto-rates', 'api request failed');
         } else {
-          if (data.hasOwnProperty('data') && data.data.length > 0) {
+          if (data?.data?.length > 0) {
             this.cryptoRates = data.data;
             this.interval = defaultInterval;
             this.emit('update-crypto-rates', '');
@@ -58,7 +58,7 @@ export const CryptoRatesApi = GObject.registerClass({
           }
           this.emit('update-currency-rates', 'api request failed');
         } else {
-          if (data.hasOwnProperty('data') && data.data.hasOwnProperty('rateUsd')) {
+          if (data?.data?.rateUsd) {
             this.currencyRates = data.data;
             this.interval = defaultInterval;
             this.emit('update-currency-rates', '');

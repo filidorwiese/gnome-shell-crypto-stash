@@ -30,7 +30,6 @@ export const ConfigModel = GObject.registerClass({
   }
 
   destroy() {
-    // No signals to disconnect in GObject-based implementation
   }
 });
 
