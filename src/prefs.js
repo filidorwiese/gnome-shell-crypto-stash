@@ -72,6 +72,7 @@ class MyPrefsWidget extends Gtk.Box {
         this._configLayout = new Gtk.Box({
             orientation: Gtk.Orientation.HORIZONTAL,
             hexpand: true,
+            vexpand: true,
             width_request: 500
         });
         this.append(this._configLayout);
@@ -194,6 +195,10 @@ class MyPrefsWidget extends Gtk.Box {
 
 export default class CryptoStashPreferences extends ExtensionPreferences {
     fillPreferencesWindow(window) {
+        // Set window size
+        window.default_width = 750;
+        window.default_height = 575;
+
         HTTP.init(this.metadata);
 
         const widget = new MyPrefsWidget(this.getSettings(), this.metadata);
