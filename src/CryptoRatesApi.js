@@ -68,6 +68,9 @@ export const CryptoRatesApi = GObject.registerClass({
         }
       });
 
+      if (this._signalTimeout) {
+        GLib.Source.remove(this._signalTimeout);
+      }
       this._signalTimeout = GLib.timeout_add_seconds(
         GLib.PRIORITY_DEFAULT,
         this.interval,

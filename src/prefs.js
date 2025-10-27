@@ -201,6 +201,10 @@ export default class CryptoStashPreferences extends ExtensionPreferences {
 
         HTTP.init(this.metadata);
 
+        window.connect('close-request', () => {
+            HTTP.destroy();
+        });
+
         const widget = new MyPrefsWidget(this.getSettings(), this.metadata);
         const page = new Adw.PreferencesPage();
         const group = new Adw.PreferencesGroup();
